@@ -1,0 +1,54 @@
+//
+// Created by Debraj Ray on 2023-03-25.
+//
+
+#ifndef INC_658PROJECT_REALWORLD_H
+#define INC_658PROJECT_REALWORLD_H
+
+#include <vector>
+#include <iostream>
+#include <string>
+#include "Node.h"
+
+using namespace std;
+typedef unsigned long long ulonglong;
+
+class RealWorld {
+
+
+    vector<vector<int>> realMap;
+    vector<vector<int>> mapColors;
+
+    int goalX, goalY;
+
+public:
+    const int MAX_SIZE = 512;
+
+    void readMapFromFile(const string &fileName);
+
+    void printMap();
+    void printProvidedRealMap(vector<vector<int>> &givenMap);
+
+    void printColors();
+
+    vector<vector<int>>& getMapColors();
+    vector<vector<int>>& getRealMap();
+
+    ulonglong getRank(int x, int y);
+
+    void unrank(ulonglong rank, int &x, int &y);
+
+    void setGoalState(int x, int y);
+
+    int heuristic(int currentX, int currentY);
+
+    int heuristic(ulonglong rank);
+
+    Node createNode(int x, int y);
+
+    bool isGoalReached(int x, int y);
+
+};
+
+
+#endif //INC_658PROJECT_REALWORLD_H
