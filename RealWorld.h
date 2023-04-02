@@ -20,6 +20,8 @@ class RealWorld {
     vector<vector<int>> mapColors;
 
     int goalX, goalY;
+    int startX, startY;
+    int pathLength = 0;
 
 public:
     const int MAX_SIZE = 512;
@@ -47,6 +49,16 @@ public:
     Node createNode(int x, int y);
 
     bool isGoalReached(int x, int y);
+
+    void getGoal(int &x, int &y);
+
+    void setStart(int x, int y);
+
+    void getStart(int &x, int &y) const;
+
+    void setPathLength(int length);
+
+    int getPathLength() const;
 
 };
 

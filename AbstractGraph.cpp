@@ -36,11 +36,10 @@ void AbstractGraph::dfs(RealWorld &rworld, int x, int y, int sectorBoundaryX, in
     if (rworld.getMapColors()[x][y] == -1) {
         // unvisited -> visit it
         rworld.getMapColors()[x][y] = color;
-        double currentMin = findShortestDistanceToSectorCenter(sectorBoundaryX, sectorBoundaryY, x, y);
-        if (currentMin < minDistance) {
-            minDistance = currentMin;
-            centroid = {x, y};
-        }
+        /**
+         * Mark centroid of this abstract Node based on distance to the center of the sector.
+         */
+        findShortestDistanceToSectorCenter(sectorBoundaryX, sectorBoundaryY, x, y);
         ++nodesMarked;
     } else {
         // already visited
@@ -73,14 +72,11 @@ int AbstractGraph::dfsInASector(RealWorld &rworld, int sectorStartX, int sectorS
                  * find connected component starting from this node that lies inside the sector.
                  * Record the centroid, which is the point closest to the sector midpoint
                  */
-                minDistance = 1000;
+                minDistanceCentroid = 1000;
                 nodesMarked = 0;
                 dfs(rworld, x, y, sectorStartX + SECTOR_SIZE, sectorStartY + SECTOR_SIZE, startColor);
                 if (nodesMarked > 0) {
-                    AbstractNode abNode;
-                    abNode.color = startColor;
-                    abNode.centroidRealNode = centroid;
-                    colorAbstractNodeMap.insert({startColor, abNode});
+                    colorAbstractNodeMap.insert({startColor, {startColor, centroid}});
                     ++startColor;
                 }
             }
@@ -92,12 +88,6 @@ int AbstractGraph::dfsInASector(RealWorld &rworld, int sectorStartX, int sectorS
 void AbstractGraph::createUndirectedEdge(int color1, int color2) {
     colorAbstractNodeMap.find(color1)->second.addChildAbstractNode(color2);
     colorAbstractNodeMap.find(color2)->second.addChildAbstractNode(color1);
-}
-
-double AbstractGraph::findShortestDistanceToSectorCenter(int sectorBoundaryX, int sectorBoundaryY, int x, int y) {
-    int sectorMidX = sectorBoundaryX - (SECTOR_SIZE / 2);
-    int sectorMidY = sectorBoundaryY - (SECTOR_SIZE / 2);
-    return sqrt(pow(x - sectorMidX, 2) + pow(y - sectorMidY, 2));
 }
 
 void AbstractGraph::connectAbstractNodesWithUndirectedEdges(RealWorld &rworld) {
@@ -184,9 +174,12 @@ void AbstractGraph::printNode(int color) {
 }
 
 int AbstractGraph::heuristic(int nodeColor) {
-    const auto &centroidCurrent = colorAbstractNodeMap.find(nodeColor)->second.centroidRealNode;
+    const auto& centroidCurrent = colorAbstractNodeMap.find(nodeColor)->second.centroidRealNode;
     const auto &centroidGoal = colorAbstractNodeMap.find(goalColor)->second.centroidRealNode;
-    return (int) round(sqrt(pow(centroidCurrent.first - centroidGoal.first, 2) + pow(centroidCurrent.second - centroidGoal.second, 2)));
+    return (int) round(
+            sqrt(pow(centroidCurrent.first - centroidGoal.first, 2)
+                 + pow(centroidCurrent.second - centroidGoal.second, 2))
+            );
 }
 
 void AbstractGraph::setGoalColor(int color) {
@@ -205,3 +198,20 @@ AbstractNode AbstractGraph::unrank(ulonglong rank) {
     assert(colorAbstractNodeMap.find((int)rank) != colorAbstractNodeMap.end());
     return colorAbstractNodeMap.find((int)rank)->second;
 }
+
+int AbstractGraph::getGoalColor() {
+    return goalColor;
+}
+
+
+double AbstractGraph::findShortestDistanceToSectorCenter(int sectorBoundaryX, int sectorBoundaryY, int x, int y) {
+    int sectorMidX = sectorBoundaryX - (SECTOR_SIZE / 2);
+    int sectorMidY = sectorBoundaryY - (SECTOR_SIZE / 2);
+    double currentMin = sqrt(pow(x - sectorMidX, 2) + pow(y - sectorMidY, 2));
+    if (currentMin < minDistanceCentroid) {
+        minDistanceCentroid = currentMin;
+        centroid = {x, y};
+    }
+    return currentMin;
+}
+

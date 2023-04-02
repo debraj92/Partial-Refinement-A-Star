@@ -6,4 +6,4 @@ set(CMAKE_CXX_STANDARD 20)
 #set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
 add_executable(658Project main.cpp RealWorld.cpp RealWorld.h AbstractNode.h AbstractGraph.cpp AbstractGraph.h AStarOpenList.h
-        AstarOpenList.cpp Astar.cpp Astar.h AStarSearch.cpp AStarSearch.h)
+        AstarOpenList.cpp AStarSearch.cpp AStarSearch.h)

@@ -52,6 +52,26 @@ void RealWorld::printMap() {
     }
 }
 
+void RealWorld::printColors() {
+    for(int i=0; i<MAX_SIZE; ++i) {
+        for(int j=0; j<MAX_SIZE; ++j) {
+            if(mapColors[i][j] < 0) {
+                cout<<".   ";
+            } else {
+                cout<<mapColors[i][j];
+                if (mapColors[i][j] < 10) {
+                    cout<<"   ";
+                } else if (mapColors[i][j] < 100) {
+                    cout<<"  ";
+                } else if (mapColors[i][j] >= 100) {
+                    cout<<" ";
+                }
+            }
+        }
+        cout<<endl;
+    }
+}
+
 void RealWorld::printProvidedRealMap(vector<vector<int>> &givenMap) {
     for(int i=0; i<MAX_SIZE; ++i) {
         for(int j=0; j<MAX_SIZE; ++j) {
@@ -67,26 +87,6 @@ vector<vector<int>> &RealWorld::getMapColors() {
 
 vector<vector<int>> &RealWorld::getRealMap() {
     return realMap;
-}
-
-void RealWorld::printColors() {
-    for(int i=0; i<MAX_SIZE; ++i) {
-        for(int j=0; j<MAX_SIZE; ++j) {
-            if(mapColors[i][j] < 0) {
-                cout<<".   ";
-            } else {
-                cout<<mapColors[i][j];
-                if (mapColors[i][j] > 100) {
-                    cout<<" ";
-                } else if (mapColors[i][j] > 10) {
-                    cout<<"  ";
-                } else {
-                    cout<<"   ";
-                }
-            }
-        }
-        cout<<endl;
-    }
 }
 
 /**
@@ -123,4 +123,27 @@ int RealWorld::heuristic(ulonglong rank) {
     int x, y;
     unrank(rank, x, y);
     return heuristic(x, y);
+}
+
+void RealWorld::getGoal(int &x, int &y) {
+    x = goalX;
+    y = goalY;
+}
+
+void RealWorld::setStart(int x, int y) {
+    startX = x;
+    startY = y;
+}
+
+void RealWorld::getStart(int &x, int &y) const {
+    x = startX;
+    y = startY;
+}
+
+void RealWorld::setPathLength(int length) {
+    pathLength = length;
+}
+
+int RealWorld::getPathLength() const {
+    return pathLength;
 }

@@ -16,6 +16,13 @@ public:
 
     int color;
     pair<int, int> centroidRealNode;
+
+    AbstractNode(){
+    }
+
+    AbstractNode(int color_, pair<int, int> &centroidReal) : color(color_), centroidRealNode(centroidReal) {
+    }
+
     // have a direct edge
     unordered_set<int> reachableNodes{};
 

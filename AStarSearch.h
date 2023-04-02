@@ -18,7 +18,8 @@ class AStarSearch {
                             unique_ptr<unordered_set<ulonglong>> &closedList,
                             unique_ptr<unordered_map<ulonglong, ulonglong>> &childParent,
                             ulonglong childRank,
-                            Node &parentNode);
+                            Node &parentNode,
+                            const std::function<int(ulonglong)>& heuristic);
 
     void finalizeNodeLinks(unique_ptr<unordered_map<ulonglong, ulonglong>> &childParent, unique_ptr<unordered_set<ulonglong>> &closedList);
 
@@ -26,18 +27,22 @@ class AStarSearch {
 
     void copyRealWorld(vector<vector<int>> &copied);
 
-    bool constrainedAStarSearch(int startX, int startY, int K);
-
 public:
 
-    void createAbstractGraph(const string &fileName, int goalX, int goalY);
-    void createRealWorld(const string &fileName, int goalX, int goalY);
+    void createAbstractGraph(const string &fileName, int startX, int startY, int goalX, int goalY);
+    void createRealWorld(const string &fileName, int startX, int startY, int goalX, int goalY);
 
-    bool searchPathInRealWorldWithAstar(int startX, int startY);
+    /**
+     * For PRA*, provide non-empty abstractParentNodes. For A* this should be empty.
+     */
+    bool searchPathInRealWorldWithAstar(unique_ptr<unordered_map<ulonglong, ulonglong>> &childParent,
+                                        unique_ptr<unordered_set<ulonglong>> &abstractParentNodes);
 
-    bool searchPathInAbstractGraphWithAstar(int startX, int startY);
+    bool searchPathInAbstractGraphWithAstar(unique_ptr<unordered_map<ulonglong, ulonglong>> &childParent);
 
-    void printRealPath(unique_ptr<unordered_map<ulonglong, ulonglong>> &childParent, ulonglong rootRank);
+    bool partialRefinementAStarSearch(int K);
+
+    void printRealPath(unique_ptr<unordered_map<ulonglong, ulonglong>> &childParent, ulonglong rootRank, ulonglong destinationRank);
 
     void printAbstractPath(unique_ptr<unordered_map<ulonglong, ulonglong>> &childParent, ulonglong rootRank);
 

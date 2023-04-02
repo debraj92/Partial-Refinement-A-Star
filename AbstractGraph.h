@@ -42,11 +42,11 @@ class AbstractGraph {
 
     void connectAbstractNodesWithUndirectedEdges(RealWorld &rworld);
 
+    int nodesMarked;
     /**
      * Helper Coordinates to find centroid
      */
-     double minDistance;
-     int nodesMarked;
+     double minDistanceCentroid;
      pair<int, int> centroid;
 
 public:
@@ -64,6 +64,8 @@ public:
     bool isGoalReached(int color);
 
     AbstractNode unrank(ulonglong rank);
+
+    int getGoalColor();
 
 };
 
