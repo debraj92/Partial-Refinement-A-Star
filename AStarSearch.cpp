@@ -38,12 +38,16 @@ bool AStarSearch::searchPathInRealWorldWithAstar(unique_ptr<unordered_map<ulongl
     auto heuristicFunc = [this](ulonglong rank) {
         return realWorld->heuristic(rank);
     };
-
     unique_ptr<unordered_set<ulonglong>> closedList = make_unique<unordered_set<ulonglong>>();
     auto t1 = high_resolution_clock::now();
     AStarOpenList openList;
     int startX, startY;
     realWorld->getStart(startX, startY);
+    /// Starting point should be passable coordinate. Or non-obstacle.
+    if (realWorld->getRealMap()[startX][startY] != 0) {
+        cout<<"Starting point should be passable (non-obstacle) coordinate."<<endl;
+        return false;
+    }
     auto root = realWorld->createNode(startX, startY);
     auto h = realWorld->heuristic(startX, startY);
     root.calculateF(0, h);
@@ -57,6 +61,14 @@ bool AStarSearch::searchPathInRealWorldWithAstar(unique_ptr<unordered_map<ulongl
     bool isPathFound = false;
     int goalX, goalY;
     realWorld->getGoal(goalX, goalY);
+    /**
+     * Either this is the actual goal, in which case (goalX, goalY) should be passable
+     * Or this is an intermediate goal of PRA*, in which case this goal color should not match the final goal color.
+     */
+     if (realWorld->getRealMap()[goalX][goalY] != 0 && realWorld->getMapColors()[goalX][goalY] == abstractGraph->getGoalColor()) {
+         cout<<"Goal location should either be passable or goal must be intermediate"<<endl;
+         return false;
+     }
     // True Goal in PRA*
     int finalGoalColor = abstractGraph->getGoalColor();
     while(!openList.isEmpty()) {

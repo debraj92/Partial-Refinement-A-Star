@@ -40,6 +40,8 @@ void RealWorld::readMapFromFile(const string &fileName) {
             col = 0;
         }
         file.close();
+    } else {
+        throw std::runtime_error("Could not open file: " + fileName);
     }
 }
 
