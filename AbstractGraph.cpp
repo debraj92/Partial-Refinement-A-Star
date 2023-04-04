@@ -173,13 +173,11 @@ void AbstractGraph::printNode(int color) {
     cout<<endl;
 }
 
-int AbstractGraph::heuristic(int nodeColor) {
+double AbstractGraph::heuristic(int nodeColor) {
     const auto& centroidCurrent = colorAbstractNodeMap.find(nodeColor)->second.centroidRealNode;
     const auto &centroidGoal = colorAbstractNodeMap.find(goalColor)->second.centroidRealNode;
-    return (int) round(
-            sqrt(pow(centroidCurrent.first - centroidGoal.first, 2)
-                 + pow(centroidCurrent.second - centroidGoal.second, 2))
-            );
+    return sqrt(pow(centroidCurrent.first - centroidGoal.first, 2)
+                + pow(centroidCurrent.second - centroidGoal.second, 2));
 }
 
 void AbstractGraph::setGoalColor(int color) {
@@ -213,5 +211,13 @@ double AbstractGraph::findShortestDistanceToSectorCenter(int sectorBoundaryX, in
         centroid = {x, y};
     }
     return currentMin;
+}
+
+vector<AbstractNode> AbstractGraph::getAllAbstractNodes() {
+    vector<AbstractNode> allNodes;
+    for (auto& [color, abNode]: colorAbstractNodeMap) {
+        allNodes.emplace_back(abNode);
+    }
+    return move(allNodes);
 }
 

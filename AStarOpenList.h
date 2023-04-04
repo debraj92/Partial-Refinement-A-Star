@@ -34,10 +34,10 @@ class AStarOpenList {
     /**
      * Returns the F-score / G-score of the left / right child
      */
-    int leftChild_F(ulonglong parentIndex);
-    int rightChild_F(ulonglong parentIndex);
-    int leftChild_G(ulonglong parentIndex);
-    int rightChild_G(ulonglong parentIndex);
+    double leftChild_F(ulonglong parentIndex);
+    double rightChild_F(ulonglong parentIndex);
+    double leftChild_G(ulonglong parentIndex);
+    double rightChild_G(ulonglong parentIndex);
 
     /**
      * Standard Heap Operations
@@ -50,7 +50,7 @@ class AStarOpenList {
      * f score is smaller. For tie-breaking we check the g-scores. The lower g-score is
      * preferred.
      */
-    inline bool compareFScores(int leftF, int rightF, int leftG, int rightG);
+    inline bool compareFScores(double leftF, double rightF, double leftG, double rightG);
 
 public:
 
@@ -73,13 +73,13 @@ public:
 
     Node removeMinimum();
 
-    int peekMinimum();
+    double peekMinimum();
 
     bool isEmpty() const;
 
     bool isPresent(Node& n);
 
-    bool updateIfBetterPath(Node& n, int gvalue);
+    bool updateIfBetterPath(Node& n, double gvalue);
 
     ulonglong getMaxSize();
 };

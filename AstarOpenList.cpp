@@ -4,19 +4,19 @@
 
 #include "AStarOpenList.h"
 
-int AStarOpenList::leftChild_F(ulonglong parentIndex) {
+double AStarOpenList::leftChild_F(ulonglong parentIndex) {
     return (*fscoreHeap)[2*parentIndex + 1].getFScore();
 }
 
-int AStarOpenList::rightChild_F(ulonglong parentIndex) {
+double AStarOpenList::rightChild_F(ulonglong parentIndex) {
     return (*fscoreHeap)[2*parentIndex + 2].getFScore();
 }
 
-int AStarOpenList::leftChild_G(ulonglong parentIndex) {
+double AStarOpenList::leftChild_G(ulonglong parentIndex) {
     return (*fscoreHeap)[2*parentIndex + 1].g;
 }
 
-int AStarOpenList::rightChild_G(ulonglong parentIndex) {
+double AStarOpenList::rightChild_G(ulonglong parentIndex) {
     return (*fscoreHeap)[2*parentIndex + 2].g;
 }
 
@@ -134,7 +134,7 @@ Node AStarOpenList::removeMinimum() {
     return fscore_deleted;
 }
 
-int AStarOpenList::peekMinimum() {
+double AStarOpenList::peekMinimum() {
     return (*fscoreHeap)[0].getFScore();
 }
 
@@ -157,7 +157,7 @@ bool AStarOpenList::isPresent(Node& n) {
  * Update g cost of an existing node if a better g cost is found through another path.
  * Time Complexity: O(logN)
  */
-bool AStarOpenList::updateIfBetterPath(Node& n, int gvalue) {
+bool AStarOpenList::updateIfBetterPath(Node& n, double gvalue) {
     auto idx = openList->find(n.rank)->second;
     if (gvalue < (*fscoreHeap)[idx].g) {
         n.calculateF(gvalue, (*fscoreHeap)[idx].h);
@@ -174,6 +174,6 @@ ulonglong AStarOpenList::getMaxSize() {
     return maxSize;
 }
 
-inline bool AStarOpenList::compareFScores(int leftF, int rightF, int leftG, int rightG) {
-    return leftF == rightF ? (leftG < rightG) : (leftF < rightF);
+inline bool AStarOpenList::compareFScores(double leftF, double rightF, double leftG, double rightG) {
+    return abs(leftF - rightF) < 0.001 ? (leftG < rightG) : (leftF < rightF);
 }

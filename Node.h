@@ -15,7 +15,7 @@ public:
 
     ulonglong rank;
 
-    int g, h;
+    double g, h;
     ulonglong heap_idx;
 
     Node(ulonglong rank_) : rank(rank_) {
@@ -32,22 +32,14 @@ public:
 
     // make copy more efficient
 
-    void calculateF(int gScore, int hScore) {
+    void calculateF(double gScore, double hScore) {
         g = gScore;
         h = hScore;
     }
 
-    int getFScore() const {
+    double getFScore() const {
         return g + h;
     }
-
-    struct node_Hash
-    {
-        size_t operator()(const Node& n) const
-        {
-            return std::hash<long>()(n.rank);
-        }
-    };
 
     bool operator==(const Node& other) const
     {

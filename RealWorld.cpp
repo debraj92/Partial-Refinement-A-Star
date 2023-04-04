@@ -99,8 +99,8 @@ ulonglong RealWorld::getRank(int x, int y) {
     return x * 1000 + y;
 }
 
-int RealWorld::heuristic(int currentX, int currentY) {
-    return (int) round(sqrt(pow(currentX - goalX, 2) + pow(currentY - goalY, 2)));
+double RealWorld::heuristic(int currentX, int currentY) {
+    return sqrt(pow(currentX - goalX, 2) + pow(currentY - goalY, 2));
 }
 
 void RealWorld::setGoalState(int x, int y) {
@@ -121,7 +121,7 @@ void RealWorld::unrank(ulonglong rank, int &x, int &y) {
     x = (int)(rank / 1000);
 }
 
-int RealWorld::heuristic(ulonglong rank) {
+double RealWorld::heuristic(ulonglong rank) {
     int x, y;
     unrank(rank, x, y);
     return heuristic(x, y);

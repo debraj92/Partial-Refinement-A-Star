@@ -57,7 +57,7 @@ public:
 
     void setGoalColor(int color);
 
-    int heuristic(int nodeColor);
+    double heuristic(int nodeColor);
 
     Node createNode(int color);
 
@@ -66,6 +66,8 @@ public:
     AbstractNode unrank(ulonglong rank);
 
     int getGoalColor();
+
+    vector<AbstractNode> getAllAbstractNodes();
 
 };
 

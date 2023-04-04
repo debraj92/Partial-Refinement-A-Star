@@ -42,9 +42,9 @@ public:
 
     void setGoalState(int x, int y);
 
-    int heuristic(int currentX, int currentY);
+    double heuristic(int currentX, int currentY);
 
-    int heuristic(ulonglong rank);
+    double heuristic(ulonglong rank);
 
     Node createNode(int x, int y);
 
