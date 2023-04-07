@@ -26,10 +26,18 @@ public:
     int abstractionColor = -1;
     pair<int, int> centroidRealNode;
 
+    /**
+     * This is not an actual location. Its just the average of the nodes used for representing an
+     * abstract region. Should be used to calculate G and H costs in abstract search.
+     */
+    pair<double, double> representationCenter;
+    int totalNodesInRepresentation;
+
     AbstractNode(){
     }
 
-    AbstractNode(int color_, pair<int, int> &centroidReal) : color(color_), centroidRealNode(centroidReal) {
+    AbstractNode(int color_, pair<int, int> &centroidReal, pair<double, double> &centerRepresentation, int totalNodes) :
+    color(color_), centroidRealNode(centroidReal), representationCenter(centerRepresentation), totalNodesInRepresentation(totalNodes) {
     }
 
     // have a direct edge
@@ -40,6 +48,14 @@ public:
             // insert if not inserted already
             reachableNodes.insert(childColor);
         }
+    }
+
+    double getXTotalInRepresentation() {
+        return totalNodesInRepresentation * representationCenter.first;
+    }
+
+    double getYTotalInRepresentation() {
+        return totalNodesInRepresentation * representationCenter.second;
     }
 };
 

@@ -40,6 +40,8 @@ void AbstractGraph::dfs(int x, int y, int sectorBoundaryX, int sectorBoundaryY, 
          * Mark centroid of this abstract Node based on distance to the center of the sector.
          */
         findShortestDistanceToSectorCenter(sectorBoundaryX, sectorBoundaryY, x, y);
+        sumX += x;
+        sumY += y;
         ++nodesMarked;
     } else {
         // already visited
@@ -74,9 +76,12 @@ int AbstractGraph::dfsInASector(int sectorStartX, int sectorStartY, int startCol
                  */
                 minDistanceCentroid = 1000;
                 nodesMarked = 0;
+                sumX = 0;
+                sumY = 0;
                 dfs(x, y, sectorStartX + SECTOR_SIZE, sectorStartY + SECTOR_SIZE, startColor);
                 if (nodesMarked > 0) {
-                    colorAbstractNodeMap.insert({startColor, {startColor, centroid}});
+                    pair<double, double> representation = {sumX / nodesMarked, sumY / nodesMarked};
+                    colorAbstractNodeMap.insert({startColor, {startColor, centroid, representation, nodesMarked}});
                     ++startColor;
                 }
             }
@@ -171,14 +176,14 @@ void AbstractGraph::printNode(int color) {
 }
 
 double AbstractGraph::heuristic(int nodeColor) {
-    const auto& centroidCurrent = colorAbstractNodeMap.find(nodeColor)->second.centroidRealNode;
-    const auto &centroidGoal = colorAbstractNodeMap.find(goalColor)->second.centroidRealNode;
+    const auto& representationCurrent = colorAbstractNodeMap.find(nodeColor)->second.representationCenter;
+    const auto &representationGoal = colorAbstractNodeMap.find(goalColor)->second.representationCenter;
     /**
      * Formula:
      * ||delta x| - |delta y|| + 1.4142 * min(|delta x|, |delta y|)
      */
-     double delta_x = abs(centroidCurrent.first - centroidGoal.first);
-     double delta_y = abs(centroidCurrent.second - centroidGoal.second);
+     double delta_x = abs(representationCurrent.first - representationGoal.first);
+     double delta_y = abs(representationCurrent.second - representationGoal.second);
      return abs(delta_x - delta_y) + sqrt(2) * min(delta_x, delta_y);
 }
 
@@ -195,6 +200,7 @@ bool AbstractGraph::isGoalReached(int color) {
 }
 
 AbstractNode& AbstractGraph::unrank(ulonglong rank) {
+
     assert(colorAbstractNodeMap.find((int)rank) != colorAbstractNodeMap.end());
     return colorAbstractNodeMap.find((int)rank)->second;
 }

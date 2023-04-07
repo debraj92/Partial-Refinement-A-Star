@@ -9,6 +9,7 @@
 #include "AbstractGraph_2.h"
 #include "AbstractGraph_3.h"
 #include "AbstractGraph_4.h"
+#include "AbstractGraph_5.h"
 #include "RealWorld.h"
 #include "AStarOpenList.h"
 #include "DataPoint.h"
@@ -19,6 +20,7 @@ class AStarSearch {
     /**
      * 4 layers of abstraction constructed over the real world
      */
+    unique_ptr<AbstractGraph_5> abstractGraph5;
     unique_ptr<AbstractGraph_4> abstractGraph4;
     unique_ptr<AbstractGraph_3> abstractGraph3;
     unique_ptr<AbstractGraph_2> abstractGraph2;

@@ -2,13 +2,13 @@
 // Created by Debraj Ray on 2023-04-06.
 //
 
-#include "AbstractGraph_4.h"
+#include "AbstractGraph_5.h"
 
-void AbstractGraph_4::createAbstractGraphNodes() {
-    auto &abGraph3Map = abGraph3.accessAbstractGraph();
+void AbstractGraph_5::createAbstractGraphNodes() {
+    auto &abGraph4Map = abGraph4.accessAbstractGraph();
     int color = 0;
-    for(int abGColor = 1; abGColor <= abGraph3Map.size(); ++abGColor) {
-        auto &abNode = abGraph3Map.find(abGColor)->second;
+    for(int abGColor = 1; abGColor <= abGraph4Map.size(); ++abGColor) {
+        auto &abNode = abGraph4Map.find(abGColor)->second;
         if (abNode.abstractionColor > 0) {
             continue;
         }
@@ -27,7 +27,7 @@ void AbstractGraph_4::createAbstractGraphNodes() {
          * Find a connected node and see if its already colored. If No, then this is at least a two clique with abNode
          */
         for(auto connected1_itr = abNode.reachableNodes.begin(); connected1_itr != abNode.reachableNodes.end(); ++connected1_itr) {
-            auto &abNode1 = abGraph3.unrank(*connected1_itr);
+            auto &abNode1 = abGraph4.unrank(*connected1_itr);
             if (abNode1.abstractionColor > 0) {
                 // already colored
                 /**
@@ -48,7 +48,7 @@ void AbstractGraph_4::createAbstractGraphNodes() {
                     // Both are the same node.
                     continue;
                 }
-                auto &abNode2 = abGraph3.unrank(*connected2_itr);
+                auto &abNode2 = abGraph4.unrank(*connected2_itr);
                 if (abNode2.abstractionColor > 0) {
                     // already colored
                     continue;
@@ -70,7 +70,7 @@ void AbstractGraph_4::createAbstractGraphNodes() {
                     if (*connected3_itr == abNode.color || *connected3_itr == abNode1.color) {
                         continue;
                     }
-                    auto &abNode3 = abGraph3.unrank(*connected3_itr);
+                    auto &abNode3 = abGraph4.unrank(*connected3_itr);
                     if (abNode3.abstractionColor > 0) {
                         // already colored
                         continue;
@@ -118,9 +118,9 @@ void AbstractGraph_4::createAbstractGraphNodes() {
             int totalNodes = 0;
 
             if (found3Clique) {
-                auto &node1 = abGraph3.unrank(three_clique[0]);
-                auto &node2 = abGraph3.unrank(three_clique[1]);
-                auto &node3 = abGraph3.unrank(three_clique[2]);
+                auto &node1 = abGraph4.unrank(three_clique[0]);
+                auto &node2 = abGraph4.unrank(three_clique[1]);
+                auto &node3 = abGraph4.unrank(three_clique[2]);
 
                 node1.abstractionColor = color;
                 xSum += node1.getXTotalInRepresentation();
@@ -138,8 +138,8 @@ void AbstractGraph_4::createAbstractGraphNodes() {
                 totalNodes += node3.totalNodesInRepresentation;
 
             } else if (found2Clique) {
-                auto &node1 = abGraph3.unrank(two_clique[0]);
-                auto &node2 = abGraph3.unrank(two_clique[1]);
+                auto &node1 = abGraph4.unrank(two_clique[0]);
+                auto &node2 = abGraph4.unrank(two_clique[1]);
 
                 node1.abstractionColor = color;
                 xSum += node1.getXTotalInRepresentation();
@@ -168,8 +168,8 @@ void AbstractGraph_4::createAbstractGraphNodes() {
     }
 }
 
-void AbstractGraph_4::dfsToConnectAbstractNodes(const AbstractNode &abNode, int abG4Color, unordered_set<int> visited) {
-    if (!colorAbstractNodeMap.contains(abG4Color)) {
+void AbstractGraph_5::dfsToConnectAbstractNodes(const AbstractNode &abNode, int abG5Color, unordered_set<int> visited) {
+    if (!colorAbstractNodeMap.contains(abG5Color)) {
         return;
     }
 
@@ -179,42 +179,43 @@ void AbstractGraph_4::dfsToConnectAbstractNodes(const AbstractNode &abNode, int 
     visited.insert(abNode.color);
 
     for(const auto& connectedChildNodeColor : abNode.reachableNodes) {
-        auto &connectedChildNode = abGraph3.unrank(connectedChildNodeColor);
+        auto &connectedChildNode = abGraph4.unrank(connectedChildNodeColor);
         assert(connectedChildNode.abstractionColor >= 0);
-        if (connectedChildNode.abstractionColor == abG4Color) {
-            dfsToConnectAbstractNodes(connectedChildNode, abG4Color, visited);
+        if (connectedChildNode.abstractionColor == abG5Color) {
+            dfsToConnectAbstractNodes(connectedChildNode, abG5Color, visited);
         } else {
-            createUndirectedEdge(abG4Color, connectedChildNode.abstractionColor);
+            createUndirectedEdge(abG5Color, connectedChildNode.abstractionColor);
         }
     }
 }
 
-void AbstractGraph_4::createUndirectedEdges() {
-    int abG4Color = 1;
+void AbstractGraph_5::createUndirectedEdges() {
+    int abG5Color = 1;
     unordered_set<int> visited;
-    while (colorAbstractNodeMap.contains(abG4Color)) {
-        const auto &centroid = colorAbstractNodeMap[abG4Color].centroidRealNode;
+    while (colorAbstractNodeMap.contains(abG5Color)) {
+        const auto &centroid = colorAbstractNodeMap[abG5Color].centroidRealNode;
         auto abGColor = rworld.getMapColors()[centroid.first][centroid.second];
         auto abG2Color = abGraph.unrank(abGColor).abstractionColor;
         auto abG3Color = abGraph2.unrank(abG2Color).abstractionColor;
+        auto abG4Color = abGraph3.unrank(abG3Color).abstractionColor;
         if (!visited.contains(abG3Color)) {
-            const auto &abG3Node = abGraph3.unrank(abG3Color);
-            dfsToConnectAbstractNodes(abG3Node, abG4Color, visited);
+            const auto &abG4Node = abGraph4.unrank(abG4Color);
+            dfsToConnectAbstractNodes(abG4Node, abG5Color, visited);
         }
-        ++abG4Color;
+        ++abG5Color;
     }
 }
 
-void AbstractGraph_4::createUndirectedEdge(int color1, int color2) {
+void AbstractGraph_5::createUndirectedEdge(int color1, int color2) {
     colorAbstractNodeMap.find(color1)->second.addChildAbstractNode(color2);
     colorAbstractNodeMap.find(color2)->second.addChildAbstractNode(color1);
 }
 
-void AbstractGraph_4::setGoalColor(int color) {
+void AbstractGraph_5::setGoalColor(int color) {
     goalColor = color;
 }
 
-double AbstractGraph_4::heuristic(int nodeColor) {
+double AbstractGraph_5::heuristic(int nodeColor) {
     const auto& representationCurrent = colorAbstractNodeMap.find(nodeColor)->second.representationCenter;
     const auto &representationGoal = colorAbstractNodeMap.find(goalColor)->second.representationCenter;
     /**
@@ -226,24 +227,24 @@ double AbstractGraph_4::heuristic(int nodeColor) {
     return abs(delta_x - delta_y) + sqrt(2) * min(delta_x, delta_y);
 }
 
-Node AbstractGraph_4::createNode(int color) {
+Node AbstractGraph_5::createNode(int color) {
     return {(ulonglong) color};
 }
 
-bool AbstractGraph_4::isGoalReached(int color) {
+bool AbstractGraph_5::isGoalReached(int color) {
     return goalColor == color;
 }
 
-AbstractNode &AbstractGraph_4::unrank(ulonglong rank) {
+AbstractNode &AbstractGraph_5::unrank(ulonglong rank) {
     assert(colorAbstractNodeMap.find((int)rank) != colorAbstractNodeMap.end());
     return colorAbstractNodeMap.find((int)rank)->second;
 }
 
-int AbstractGraph_4::getGoalColor() {
+int AbstractGraph_5::getGoalColor() {
     return goalColor;
 }
 
-vector<AbstractNode> AbstractGraph_4::getAllAbstractNodes() {
+vector<AbstractNode> AbstractGraph_5::getAllAbstractNodes() {
     vector<AbstractNode> allNodes;
     for (auto& [color, abNode]: colorAbstractNodeMap) {
         allNodes.emplace_back(abNode);
@@ -251,12 +252,12 @@ vector<AbstractNode> AbstractGraph_4::getAllAbstractNodes() {
     return move(allNodes);
 }
 
-void AbstractGraph_4::createAbstractGraph() {
+void AbstractGraph_5::createAbstractGraph() {
     createAbstractGraphNodes();
     createUndirectedEdges();
 }
 
-void AbstractGraph_4::printNode(int color) {
+void AbstractGraph_5::printNode(int color) {
     const auto &color_AbsNode = colorAbstractNodeMap.find(color);
     cout<<"Color: "<<color_AbsNode->first<<", Connected Colors: ";
     for(const auto& childColor: color_AbsNode->second.reachableNodes) {
@@ -265,15 +266,16 @@ void AbstractGraph_4::printNode(int color) {
     cout<<endl;
 }
 
-int AbstractGraph_4::getStartColor() {
+int AbstractGraph_5::getStartColor() {
     int startX, startY;
     rworld.getStart(startX, startY);
     int startColor_abstraction1 = rworld.getMapColors()[startX][startY];
     int startColor_abstraction2 = abGraph.unrank(startColor_abstraction1).abstractionColor;
     int startColor_abstraction3 = abGraph2.unrank(startColor_abstraction2).abstractionColor;
-    return abGraph3.unrank(startColor_abstraction3).abstractionColor;
+    int startColor_abstraction4 = abGraph3.unrank(startColor_abstraction3).abstractionColor;
+    return abGraph4.unrank(startColor_abstraction4).abstractionColor;
 }
 
-unordered_map<int, AbstractNode> &AbstractGraph_4::accessAbstractGraph() {
+unordered_map<int, AbstractNode> &AbstractGraph_5::accessAbstractGraph() {
     return colorAbstractNodeMap;
 }

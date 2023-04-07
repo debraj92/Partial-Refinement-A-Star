@@ -10,7 +10,7 @@ void AbstractGraph_3::createAbstractGraphNodes() {
     int color = 0;
     for(int abGColor = 1; abGColor <= abGraph2Map.size(); ++abGColor) {
         auto &abNode = abGraph2Map.find(abGColor)->second;
-        if (abNode.abstractionColor >= 0) {
+        if (abNode.abstractionColor > 0) {
             continue;
         }
         ++color;
@@ -29,7 +29,7 @@ void AbstractGraph_3::createAbstractGraphNodes() {
          */
         for(auto connected1_itr = abNode.reachableNodes.begin(); connected1_itr != abNode.reachableNodes.end(); ++connected1_itr) {
             auto &abNode1 = abGraph2.unrank(*connected1_itr);
-            if (abNode1.abstractionColor >= 0) {
+            if (abNode1.abstractionColor > 0) {
                 // already colored
                 /**
                  * This abstract graph node already belongs to a node of abstract graph 2
@@ -50,7 +50,7 @@ void AbstractGraph_3::createAbstractGraphNodes() {
                     continue;
                 }
                 auto &abNode2 = abGraph2.unrank(*connected2_itr);
-                if (abNode2.abstractionColor >= 0) {
+                if (abNode2.abstractionColor > 0) {
                     // already colored
                     continue;
                 } else {
@@ -72,7 +72,7 @@ void AbstractGraph_3::createAbstractGraphNodes() {
                         continue;
                     }
                     auto &abNode3 = abGraph2.unrank(*connected3_itr);
-                    if (abNode3.abstractionColor >= 0) {
+                    if (abNode3.abstractionColor > 0) {
                         // already colored
                         continue;
                     }
@@ -88,7 +88,17 @@ void AbstractGraph_3::createAbstractGraphNodes() {
                         abNode1.abstractionColor = color;
                         abNode2.abstractionColor = color;
                         abNode3.abstractionColor = color;
-                        colorAbstractNodeMap.insert({color, {color, abNode.centroidRealNode}});
+                        /**
+                         * X and Y averages
+                         */
+                         int totalNodes = abNode.totalNodesInRepresentation + abNode1.totalNodesInRepresentation +
+                                 abNode2.totalNodesInRepresentation + abNode3.totalNodesInRepresentation;
+                        double xAvg = (double) (abNode.getXTotalInRepresentation() + abNode1.getXTotalInRepresentation() +
+                                                abNode2.getXTotalInRepresentation() + abNode3.getXTotalInRepresentation()) / totalNodes;
+                        double yAvg = (double) (abNode.getYTotalInRepresentation() + abNode1.getYTotalInRepresentation() +
+                                                abNode2.getYTotalInRepresentation() + abNode3.getYTotalInRepresentation()) / totalNodes;
+                        pair<double, double> representation = {xAvg, yAvg};
+                        colorAbstractNodeMap.insert({color, {color, abNode.centroidRealNode, representation, totalNodes}});
                         found4Clique = true;
                         break;
                     }
@@ -101,20 +111,61 @@ void AbstractGraph_3::createAbstractGraphNodes() {
          * Form 3 clique or 2 clique or an orphan node if 4 clique not found
          */
         if (!found4Clique) {
+            /**
+             * For measuring averages across abstract regions. This is then used to calculate the central
+             * representation
+             */
+            double xAvg, yAvg, xSum = 0, ySum = 0;
+            int totalNodes = 0;
+
             if (found3Clique) {
-                abGraph2.unrank(three_clique[0]).abstractionColor = color;
-                abGraph2.unrank(three_clique[1]).abstractionColor = color;
-                abGraph2.unrank(three_clique[2]).abstractionColor = color;
-                colorAbstractNodeMap.insert({color, {color, abNode.centroidRealNode}});
+                auto &node1 = abGraph2.unrank(three_clique[0]);
+                auto &node2 = abGraph2.unrank(three_clique[1]);
+                auto &node3 = abGraph2.unrank(three_clique[2]);
+
+                node1.abstractionColor = color;
+                xSum += node1.getXTotalInRepresentation();
+                ySum += node1.getYTotalInRepresentation();
+                totalNodes += node1.totalNodesInRepresentation;
+
+                node2.abstractionColor = color;
+                xSum += node2.getXTotalInRepresentation();
+                ySum += node2.getYTotalInRepresentation();
+                totalNodes += node2.totalNodesInRepresentation;
+
+                node3.abstractionColor = color;
+                xSum += node3.getXTotalInRepresentation();
+                ySum += node3.getYTotalInRepresentation();
+                totalNodes += node3.totalNodesInRepresentation;
+
             } else if (found2Clique) {
-                abGraph2.unrank(two_clique[0]).abstractionColor = color;
-                abGraph2.unrank(two_clique[1]).abstractionColor = color;
-                colorAbstractNodeMap.insert({color, {color, abNode.centroidRealNode}});
+                auto &node1 = abGraph2.unrank(two_clique[0]);
+                auto &node2 = abGraph2.unrank(two_clique[1]);
+
+                node1.abstractionColor = color;
+                xSum += node1.getXTotalInRepresentation();
+                ySum += node1.getYTotalInRepresentation();
+                totalNodes += node1.totalNodesInRepresentation;
+
+                node2.abstractionColor = color;
+                xSum += node2.getXTotalInRepresentation();
+                ySum += node2.getYTotalInRepresentation();
+                totalNodes += node2.totalNodesInRepresentation;
+
             } else {
                 abNode.abstractionColor = color;
-                colorAbstractNodeMap.insert({color, {color, abNode.centroidRealNode}});
+
+                xSum += abNode.getXTotalInRepresentation();
+                ySum += abNode.getYTotalInRepresentation();
+                totalNodes += abNode.totalNodesInRepresentation;
             }
+
+            xAvg = xSum / totalNodes;
+            yAvg = ySum / totalNodes;
+            pair<double, double> representation = {xAvg, yAvg};
+            colorAbstractNodeMap.insert({color, {color, abNode.centroidRealNode, representation, totalNodes}});
         }
+        assert(abNode.abstractionColor > 0);
     }
     //cout<<"Total Colors in ABG3 "<<color<<endl;
 }
@@ -131,7 +182,7 @@ void AbstractGraph_3::dfsToConnectAbstractNodes(const AbstractNode &abNode, int 
 
     for(const auto& connectedChildNodeColor : abNode.reachableNodes) {
         auto &connectedChildNode = abGraph2.unrank(connectedChildNodeColor);
-        assert(connectedChildNode.abstractionColor >= 0);
+        assert(connectedChildNode.abstractionColor > 0);
         if (connectedChildNode.abstractionColor == abG3Color) {
             dfsToConnectAbstractNodes(connectedChildNode, abG3Color, visited);
         } else {
@@ -151,6 +202,7 @@ void AbstractGraph_3::createUndirectedEdges() {
             const auto &abG2Node = abGraph2.unrank(abG2Color);
             dfsToConnectAbstractNodes(abG2Node, abG3Color, visited);
         }
+        //printNode(abG3Color);
         ++abG3Color;
     }
 }
@@ -165,14 +217,14 @@ void AbstractGraph_3::setGoalColor(int color) {
 }
 
 double AbstractGraph_3::heuristic(int nodeColor) {
-    const auto& centroidCurrent = colorAbstractNodeMap.find(nodeColor)->second.centroidRealNode;
-    const auto &centroidGoal = colorAbstractNodeMap.find(goalColor)->second.centroidRealNode;
+    const auto& representationCurrent = colorAbstractNodeMap.find(nodeColor)->second.representationCenter;
+    const auto &representationGoal = colorAbstractNodeMap.find(goalColor)->second.representationCenter;
     /**
      * Formula:
      * ||delta x| - |delta y|| + 1.4142 * min(|delta x|, |delta y|)
      */
-    double delta_x = abs(centroidCurrent.first - centroidGoal.first);
-    double delta_y = abs(centroidCurrent.second - centroidGoal.second);
+    double delta_x = abs(representationCurrent.first - representationGoal.first);
+    double delta_y = abs(representationCurrent.second - representationGoal.second);
     return abs(delta_x - delta_y) + sqrt(2) * min(delta_x, delta_y);
 }
 
@@ -225,4 +277,30 @@ int AbstractGraph_3::getStartColor() {
 
 unordered_map<int, AbstractNode> &AbstractGraph_3::accessAbstractGraph() {
     return colorAbstractNodeMap;
+}
+
+void AbstractGraph_3::printConnectedColors() {
+    for(int i=0; i<rworld.MAX_SIZE; ++i) {
+        for(int j=0; j<rworld.MAX_SIZE; ++j) {
+            int abG3Color = 0;
+            if (rworld.getRealMap()[i][j] == 0) {
+                auto abGColor = rworld.getMapColors()[i][j];
+                auto abG2Color = abGraph.unrank(abGColor).abstractionColor;
+                abG3Color = abGraph2.unrank(abG2Color).abstractionColor;
+            }
+            if(!abG3Color) {
+                cout<<".   ";
+            } else {
+                cout<<abG3Color;
+                if (abG3Color < 10) {
+                    cout<<"   ";
+                } else if (abG3Color < 100) {
+                    cout<<"  ";
+                } else if (abG3Color >= 100) {
+                    cout<<" ";
+                }
+            }
+        }
+        cout<<endl;
+    }
 }

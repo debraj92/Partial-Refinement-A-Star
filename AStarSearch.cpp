@@ -23,6 +23,9 @@ void AStarSearch::createAbstractGraph(const string &fileName) {
 
     abstractGraph4 = make_unique<AbstractGraph_4>(*realWorld, *abstractGraph, *abstractGraph2, *abstractGraph3);
     abstractGraph4->createAbstractGraph();
+
+    abstractGraph5 = make_unique<AbstractGraph_5>(*realWorld, *abstractGraph, *abstractGraph2, *abstractGraph3, *abstractGraph4);
+    abstractGraph5->createAbstractGraph();
 }
 
 void AStarSearch::initStartState(int startX, int startY) {
@@ -40,6 +43,9 @@ void AStarSearch::initGoalState(int goalX, int goalY) {
     );
     abstractGraph4->setGoalColor(
             abstractGraph3->unrank(abstractGraph3->getGoalColor()).abstractionColor
+    );
+    abstractGraph5->setGoalColor(
+            abstractGraph4->unrank(abstractGraph4->getGoalColor()).abstractionColor
     );
 }
 
@@ -289,13 +295,14 @@ void AStarSearch::printAbstractPath(unique_ptr<unordered_map<ulonglong, ulonglon
     copyRealWorld(copied);
     current = childParent->find(rootRank)->first;
     auto abstractNode = abstraction->unrank(current);
-    copied[abstractNode.centroidRealNode.first][abstractNode.centroidRealNode.second] = 9;
+    copied[(int)round(abstractNode.representationCenter.first)][(int)round(abstractNode.representationCenter.second)] = 9;
     while(current != destinationRank) {
         current = childParent->find(current)->second;
         abstractNode = abstraction->unrank(current);
-        copied[abstractNode.centroidRealNode.first][abstractNode.centroidRealNode.second] = 9;
+        copied[(int)round(abstractNode.representationCenter.first)][(int)round(abstractNode.representationCenter.second)] = 9;
     }
     realWorld->printProvidedRealMap(copied);
+
 
 }
 
@@ -329,6 +336,9 @@ bool AStarSearch::searchPathInAbstractGraphWithAstar(unique_ptr<unordered_map<ul
         case 4:
             abstraction = abstractGraph4.get();
             break;
+        case 5:
+            abstraction = abstractGraph5.get();
+            break;
     }
 
     unique_ptr<unordered_set<ulonglong>> closedList = make_unique<unordered_set<ulonglong>>();
@@ -351,7 +361,11 @@ bool AStarSearch::searchPathInAbstractGraphWithAstar(unique_ptr<unordered_map<ul
     openList.insert(root);
     childParent->insert({root.rank, root.rank});
     bool isPathFound = false;
-    bool isLastMile = abstraction->unrank(abstraction->getGoalColor()).abstractionColor == parentGoalColor;
+    /**
+     * LastMile if pathfinding for the highest level of abstraction or the actual goal of current abstraction lies in the
+     * parentGoal region
+     */
+    bool isLastMile = (!parentGoalColor) || abstraction->unrank(abstraction->getGoalColor()).abstractionColor == parentGoalColor;
     while(!openList.isEmpty()) {
         Node nextNode = openList.removeMinimum();
         closedList->insert(nextNode.rank);
@@ -400,7 +414,6 @@ bool AStarSearch::searchPathInAbstractGraphWithAstar(unique_ptr<unordered_map<ul
 bool AStarSearch::partialRefinementAStarSearch(int K, DataPoint &dataPoint) {
     /// container to store paths
     unique_ptr<unordered_map<ulonglong, ulonglong>> pathRealWorld = make_unique<unordered_map<ulonglong, ulonglong>>();
-    unique_ptr<unordered_map<ulonglong, ulonglong>> pathAbstractWorld = make_unique<unordered_map<ulonglong, ulonglong>>();
 
     /// store parent nodes for constrained A*
     unique_ptr<unordered_set<ulonglong>> abstractParentNodes = make_unique<unordered_set<ulonglong>>();
@@ -413,12 +426,11 @@ bool AStarSearch::partialRefinementAStarSearch(int K, DataPoint &dataPoint) {
     realWorld->getGoal(destinationX, destinationY);
     bool isPathFound = false;
     bool isLastMile = false;
-    ulonglong goalColor = -1;
+    ulonglong goalColor = 0;
     realWorld->setPathLength(0);
 
     auto t1 = high_resolution_clock::now();
     while (!isLastMile) {
-        pathAbstractWorld->clear();
         /**
          * Search, truncate and refine path through abstraction levels
          */
@@ -427,7 +439,7 @@ bool AStarSearch::partialRefinementAStarSearch(int K, DataPoint &dataPoint) {
         }
         /// Update RealWorld start and goal state. Updating real world start state affects start state of
         /// abstract graphs
-        if ((ulonglong)abstractGraph->getGoalColor() != goalColor) {
+        if (realWorld->getMapColors()[destinationX][destinationY] != goalColor) {
             /**
              * Not the goal node
              */
@@ -435,7 +447,7 @@ bool AStarSearch::partialRefinementAStarSearch(int K, DataPoint &dataPoint) {
             /**
              * Target is centroid of Kth node
              */
-            realWorld->setGoalState(absNextNode.centroidRealNode.first, absNextNode.centroidRealNode.second);
+            realWorld->setGoalState((int)round(absNextNode.representationCenter.first), (int)round(absNextNode.representationCenter.second));
         } else {
             /**
              * Target abstract node is the goal node. Restore actual destination coordinates in real world
@@ -458,6 +470,8 @@ bool AStarSearch::partialRefinementAStarSearch(int K, DataPoint &dataPoint) {
         } else if (isLastMile) {
             isPathFound = true;
         }
+        abstractParentNodes->clear();
+        goalColor = 0;
     }
     auto t2 = high_resolution_clock::now();
     auto time_in_ms = duration_cast<chrono::milliseconds>(t2 - t1);
@@ -512,7 +526,7 @@ void AStarSearch::printPathNodes(unique_ptr<unordered_map<ulonglong, ulonglong>>
         ++count;
     }
     cout<<endl;
-    cout<<"Total Nodes in Path "<<count;
+    cout<<"Total Nodes in Path "<<count<<endl;
 }
 
 /**
@@ -522,7 +536,7 @@ void AStarSearch::printPathNodes(unique_ptr<unordered_map<ulonglong, ulonglong>>
  */
 bool
 AStarSearch::searchAndTruncatePathInAbstractWorld(int K, unique_ptr<unordered_set<ulonglong>> &abstractParentNodes, ulonglong &parentGoalColor) {
-    int abstractionLevel = 4;
+    int abstractionLevel = 5;
     abstractParentNodes->clear();
     unique_ptr<unordered_map<ulonglong, ulonglong>> path = make_unique<unordered_map<ulonglong, ulonglong>>();
     bool isPathFound = true;
@@ -542,12 +556,17 @@ AStarSearch::searchAndTruncatePathInAbstractWorld(int K, unique_ptr<unordered_se
          */
         // PRA*(Inf) uses K = 10000
         int goalColorAbstraction = getGoalColorOfAbstraction(abstractionLevel);
-        for(int i=1; i<K && currentColor != goalColorAbstraction; ++i) {
+        int i = 1;
+        for(; i<K && currentColor != goalColorAbstraction; ++i) {
             currentColor = path->find(currentColor)->second;
             abstractParentNodes->insert(currentColor);
         }
-
-        parentGoalColor = currentColor;
+        if (i < K) {
+            abstractParentNodes->insert(goalColorAbstraction);
+            parentGoalColor = goalColorAbstraction;
+        } else {
+            parentGoalColor = currentColor;
+        }
         path->clear();
         --abstractionLevel;
     }
@@ -565,6 +584,8 @@ int AStarSearch::getStartColorOfAbstraction(int abstractionLevel) {
             return abstractGraph3->getStartColor();
         case 4:
             return abstractGraph4->getStartColor();
+        case 5:
+            return abstractGraph5->getStartColor();
     }
     throw std::runtime_error("Invalid Abstraction Level");
 }
@@ -579,6 +600,8 @@ int AStarSearch::getGoalColorOfAbstraction(int abstractionLevel) {
             return abstractGraph3->getGoalColor();
         case 4:
             return abstractGraph4->getGoalColor();
+        case 5:
+            return abstractGraph5->getGoalColor();
     }
     throw std::runtime_error("Invalid Abstraction Level");
 }

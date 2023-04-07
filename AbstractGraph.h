@@ -24,7 +24,7 @@ using namespace std;
  */
 class AbstractGraph : public Abstraction {
 
-    const int SECTOR_SIZE = 4;
+    const int SECTOR_SIZE = 2;
     unordered_map<int, AbstractNode> colorAbstractNodeMap;
 
     RealWorld &rworld;
@@ -46,6 +46,7 @@ class AbstractGraph : public Abstraction {
     void connectAbstractNodesWithUndirectedEdges();
 
     int nodesMarked;
+    int sumX, sumY;
     /**
      * Helper Coordinates to find centroid
      */

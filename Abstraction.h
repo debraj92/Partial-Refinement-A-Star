@@ -28,8 +28,8 @@ public:
     virtual int getStartColor() = 0;
 
     virtual double getGCost(const AbstractNode &n1, const AbstractNode &n2) {
-        return sqrt(pow(n1.centroidRealNode.first - n2.centroidRealNode.first, 2) +
-        pow(n1.centroidRealNode.second - n2.centroidRealNode.second, 2));
+        return sqrt(pow(n1.representationCenter.first - n2.representationCenter.first, 2) +
+        pow(n1.representationCenter.second - n2.representationCenter.second, 2));
     };
 
     virtual unordered_map<int, AbstractNode>& accessAbstractGraph() = 0;
