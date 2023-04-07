@@ -6,12 +6,22 @@
 #define INC_658PROJECT_ASTARSEARCH_H
 
 #include "AbstractGraph.h"
+#include "AbstractGraph_2.h"
+#include "AbstractGraph_3.h"
+#include "AbstractGraph_4.h"
 #include "RealWorld.h"
 #include "AStarOpenList.h"
 #include "DataPoint.h"
+#include "Abstraction.h"
 
 class AStarSearch {
 
+    /**
+     * 4 layers of abstraction constructed over the real world
+     */
+    unique_ptr<AbstractGraph_4> abstractGraph4;
+    unique_ptr<AbstractGraph_3> abstractGraph3;
+    unique_ptr<AbstractGraph_2> abstractGraph2;
     unique_ptr<AbstractGraph> abstractGraph;
     unique_ptr<RealWorld> realWorld;
 
@@ -20,7 +30,8 @@ class AStarSearch {
                             unique_ptr<unordered_map<ulonglong, ulonglong>> &childParent,
                             ulonglong childRank,
                             Node &parentNode,
-                            const std::function<double(ulonglong)>& heuristic);
+                            const std::function<double(ulonglong)>& hCost,
+                            double gCost);
 
     void finalizeNodeLinks(unique_ptr<unordered_map<ulonglong, ulonglong>> &childParent, unique_ptr<unordered_set<ulonglong>> &closedList);
 
@@ -43,13 +54,27 @@ public:
                                         const unique_ptr<unordered_set<ulonglong>> &abstractParentNodes,
                                         DataPoint &dataPoint);
 
-    bool searchPathInAbstractGraphWithAstar(unique_ptr<unordered_map<ulonglong, ulonglong>> &childParent);
+    /**
+     * Search a path through an abstraction level. It uses constrained A* search that expands nodes whose parent node
+     * is part of the abstract path in the next higher level of abstraction
+     */
+    bool searchPathInAbstractGraphWithAstar(unique_ptr<unordered_map<ulonglong,
+                                            ulonglong>> &childParent,
+                                            const unique_ptr<unordered_set<ulonglong>> &abstractParentNodes,
+                                            int abstractionLevel,
+                                            ulonglong parentGoalColor);
+
+    bool searchAndTruncatePathInAbstractWorld (int K, unique_ptr<unordered_set<ulonglong>> &abstractParentNodes, ulonglong &parentGoalColor);
+
+    int getStartColorOfAbstraction(int abstractionLevel);
+
+    int getGoalColorOfAbstraction(int abstractionLevel);
 
     bool partialRefinementAStarSearch(int K, DataPoint &dataPoint);
 
     void printRealPath(unique_ptr<unordered_map<ulonglong, ulonglong>> &childParent, ulonglong rootRank, ulonglong destinationRank);
 
-    void printAbstractPath(unique_ptr<unordered_map<ulonglong, ulonglong>> &childParent, ulonglong rootRank);
+    void printAbstractPath(unique_ptr<unordered_map<ulonglong, ulonglong>> &childParent, ulonglong rootRank, ulonglong destinationRank, Abstraction *abstraction);
 
     unique_ptr<AbstractGraph>& accessAbstractGraph();
     unique_ptr<RealWorld>& accessRealWorld();
@@ -61,14 +86,12 @@ public:
         int startY;
         int goalX;
         int goalY;
-        int goalColor;
 
-        void init (int sx, int sy, int gx, int gy, int gcolor) {
+        void init (int sx, int sy, int gx, int gy) {
             startX = sx;
             startY = sy;
             goalX = gx;
             goalY = gy;
-            goalColor = gcolor;
         }
     };
 

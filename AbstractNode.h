@@ -14,7 +14,16 @@ class AbstractNode {
 
 public:
 
+    /**
+     * Color of this node from child node's perspective.
+     * It decides the color and paints the child nodes.
+     */
     int color;
+    /**
+     * Color of this node from parent node's perspective.
+     * Parent node sets the color
+     */
+    int abstractionColor = -1;
     pair<int, int> centroidRealNode;
 
     AbstractNode(){
@@ -27,7 +36,7 @@ public:
     unordered_set<int> reachableNodes{};
 
     void addChildAbstractNode(int childColor) {
-        if (reachableNodes.find(childColor) == reachableNodes.end()) {
+        if (!reachableNodes.contains(childColor)) {
             // insert if not inserted already
             reachableNodes.insert(childColor);
         }

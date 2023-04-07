@@ -11,6 +11,7 @@
 #include <unordered_map>
 #include "AbstractNode.h"
 #include "RealWorld.h"
+#include "Abstraction.h"
 
 using namespace std;
 
@@ -21,26 +22,28 @@ using namespace std;
  *   v
  *   x
  */
-class AbstractGraph {
+class AbstractGraph : public Abstraction {
 
-    const int SECTOR_SIZE = 16;
+    const int SECTOR_SIZE = 4;
     unordered_map<int, AbstractNode> colorAbstractNodeMap;
+
+    RealWorld &rworld;
 
     int goalColor;
 
-    void dfs(RealWorld &rworld, int x, int y, int sectorBoundaryX, int sectorBoundaryY,  int color);
+    void dfs(int x, int y, int sectorBoundaryX, int sectorBoundaryY,  int color);
 
-    int dfsInASector(RealWorld &rworld, int sectorStartX, int sectorStartY, int startColor);
+    int dfsInASector(int sectorStartX, int sectorStartY, int startColor);
 
     void createUndirectedEdge(int color1, int color2);
 
     double findShortestDistanceToSectorCenter(int sectorBoundaryX, int sectorBoundaryY, int x, int y);
 
-    void dfsToConnectAbstractNodes(RealWorld &rworld, int x, int y, vector<vector<bool>> &visited);
+    void dfsToConnectAbstractNodes(int x, int y, const int parentColor, vector<vector<bool>> &visited);
 
-    void createAbstractGraphNodes(RealWorld &rworld);
+    void createAbstractGraphNodes();
 
-    void connectAbstractNodesWithUndirectedEdges(RealWorld &rworld);
+    void connectAbstractNodesWithUndirectedEdges();
 
     int nodesMarked;
     /**
@@ -51,7 +54,11 @@ class AbstractGraph {
 
 public:
 
-    void createAbstractGraph(RealWorld &rworld);
+    AbstractGraph(RealWorld &realWorld) : rworld(realWorld) {
+
+    }
+
+    void createAbstractGraph();
 
     void printNode(int color);
 
@@ -63,11 +70,15 @@ public:
 
     bool isGoalReached(int color);
 
-    AbstractNode unrank(ulonglong rank);
+    AbstractNode& unrank(ulonglong rank);
 
     int getGoalColor();
 
     vector<AbstractNode> getAllAbstractNodes();
+
+    unordered_map<int, AbstractNode>& accessAbstractGraph();
+
+    int getStartColor();
 
 };
 

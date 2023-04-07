@@ -4,7 +4,7 @@
 
 #include "AbstractGraph.h"
 
-void AbstractGraph::createAbstractGraphNodes(RealWorld &rworld) {
+void AbstractGraph::createAbstractGraphNodes() {
     int color = 1;
     int totalSectors = rworld.MAX_SIZE / SECTOR_SIZE;
     for(int sectorStartX = 0; sectorStartX < totalSectors; ++sectorStartX) {
@@ -12,12 +12,12 @@ void AbstractGraph::createAbstractGraphNodes(RealWorld &rworld) {
             /**
              * Visit all real nodes in a sector and generate abstract nodes
              */
-            color = dfsInASector(rworld, SECTOR_SIZE * sectorStartX, SECTOR_SIZE * sectorStartY, color);
+            color = dfsInASector(SECTOR_SIZE * sectorStartX, SECTOR_SIZE * sectorStartY, color);
         }
     }
 }
 
-void AbstractGraph::dfs(RealWorld &rworld, int x, int y, int sectorBoundaryX, int sectorBoundaryY, int color) {
+void AbstractGraph::dfs(int x, int y, int sectorBoundaryX, int sectorBoundaryY, int color) {
     /**
      * Check x, y lies within sector
      */
@@ -50,20 +50,20 @@ void AbstractGraph::dfs(RealWorld &rworld, int x, int y, int sectorBoundaryX, in
      * 4 possible directions to visit: up, down, left, right
      */
      if (x > 0) {
-         dfs(rworld, x - 1, y, sectorBoundaryX, sectorBoundaryY, color);
+         dfs(x - 1, y, sectorBoundaryX, sectorBoundaryY, color);
      }
     if (y > 0) {
-        dfs(rworld, x, y - 1, sectorBoundaryX, sectorBoundaryY, color);
+        dfs(x, y - 1, sectorBoundaryX, sectorBoundaryY, color);
     }
     if (x < rworld.MAX_SIZE - 1) {
-        dfs(rworld, x + 1, y, sectorBoundaryX, sectorBoundaryY, color);
+        dfs(x + 1, y, sectorBoundaryX, sectorBoundaryY, color);
     }
     if (y < rworld.MAX_SIZE - 1) {
-        dfs(rworld, x, y + 1, sectorBoundaryX, sectorBoundaryY, color);
+        dfs(x, y + 1, sectorBoundaryX, sectorBoundaryY, color);
     }
 }
 
-int AbstractGraph::dfsInASector(RealWorld &rworld, int sectorStartX, int sectorStartY, int startColor) {
+int AbstractGraph::dfsInASector(int sectorStartX, int sectorStartY, int startColor) {
     for(int x = sectorStartX; x < sectorStartX + SECTOR_SIZE; ++x) {
         for(int y = sectorStartY; y < sectorStartY + SECTOR_SIZE; ++y) {
             if (rworld.getMapColors()[x][y] == -1 && rworld.getRealMap()[x][y] == 0) {
@@ -74,7 +74,7 @@ int AbstractGraph::dfsInASector(RealWorld &rworld, int sectorStartX, int sectorS
                  */
                 minDistanceCentroid = 1000;
                 nodesMarked = 0;
-                dfs(rworld, x, y, sectorStartX + SECTOR_SIZE, sectorStartY + SECTOR_SIZE, startColor);
+                dfs(x, y, sectorStartX + SECTOR_SIZE, sectorStartY + SECTOR_SIZE, startColor);
                 if (nodesMarked > 0) {
                     colorAbstractNodeMap.insert({startColor, {startColor, centroid}});
                     ++startColor;
@@ -90,7 +90,7 @@ void AbstractGraph::createUndirectedEdge(int color1, int color2) {
     colorAbstractNodeMap.find(color2)->second.addChildAbstractNode(color1);
 }
 
-void AbstractGraph::connectAbstractNodesWithUndirectedEdges(RealWorld &rworld) {
+void AbstractGraph::connectAbstractNodesWithUndirectedEdges() {
     for (const auto& color_AbsNode: colorAbstractNodeMap) {
         /**
          * Create an empty 2d visited array for DFS
@@ -103,64 +103,61 @@ void AbstractGraph::connectAbstractNodesWithUndirectedEdges(RealWorld &rworld) {
             }
         }
         const auto& absNode = color_AbsNode.second;
-        dfsToConnectAbstractNodes(rworld, absNode.centroidRealNode.first, absNode.centroidRealNode.second, visited);
+        assert(absNode.color == color_AbsNode.first);
+        dfsToConnectAbstractNodes(absNode.centroidRealNode.first, absNode.centroidRealNode.second, absNode.color, visited);
+        //printNode(absNode.color);
     }
 }
 
-void AbstractGraph::dfsToConnectAbstractNodes(RealWorld &rworld, int x, int y, vector<vector<bool>> &visited) {
+void AbstractGraph::dfsToConnectAbstractNodes(int x, int y, const int parentColor, vector<vector<bool>> &visited) {
     if (x >= rworld.MAX_SIZE || y >= rworld.MAX_SIZE) {
         return;
     }
     if (x < 0 || y < 0) {
         return;
     }
-    if (rworld.getRealMap()[x][y] != 0) {
-        // obstacles
-        return;
-    }
     if(visited[x % SECTOR_SIZE][y % SECTOR_SIZE]) {
         return;
     }
     visited[x % SECTOR_SIZE][y % SECTOR_SIZE] = true;
-    const int nodeColor = rworld.getMapColors()[x][y];
     /**
      * 4 possible directions to visit: up, down, left, right
      * Create edge between abstract nodes if two neighbouring real nodes have different colours.
      * A colour of -1 implies a node not passable and therefore not interesting
      */
     if (x > 0 && rworld.getMapColors()[x-1][y] != -1) {
-        if(rworld.getMapColors()[x-1][y] == nodeColor) {
-            dfsToConnectAbstractNodes(rworld, x-1, y, visited);
+        if(rworld.getMapColors()[x-1][y] == parentColor) {
+            dfsToConnectAbstractNodes(x-1, y, parentColor, visited);
         } else {
-            createUndirectedEdge(nodeColor, rworld.getMapColors()[x-1][y]);
+            createUndirectedEdge(parentColor, rworld.getMapColors()[x-1][y]);
         }
     }
     if (y > 0 && rworld.getMapColors()[x][y-1] != -1) {
-        if(rworld.getMapColors()[x][y-1] == nodeColor) {
-            dfsToConnectAbstractNodes(rworld, x, y-1, visited);
+        if(rworld.getMapColors()[x][y-1] == parentColor) {
+            dfsToConnectAbstractNodes(x, y-1, parentColor, visited);
         } else {
-            createUndirectedEdge(nodeColor, rworld.getMapColors()[x][y-1]);
+            createUndirectedEdge(parentColor, rworld.getMapColors()[x][y-1]);
         }
     }
     if (x < rworld.MAX_SIZE - 1 && rworld.getMapColors()[x+1][y] != -1) {
-        if(rworld.getMapColors()[x+1][y] == nodeColor) {
-            dfsToConnectAbstractNodes(rworld, x+1, y, visited);
+        if(rworld.getMapColors()[x+1][y] == parentColor) {
+            dfsToConnectAbstractNodes(x+1, y, parentColor, visited);
         } else {
-            createUndirectedEdge(nodeColor, rworld.getMapColors()[x+1][y]);
+            createUndirectedEdge(parentColor, rworld.getMapColors()[x+1][y]);
         }
     }
     if (y < rworld.MAX_SIZE - 1 && rworld.getMapColors()[x][y+1] != -1) {
-        if(rworld.getMapColors()[x][y+1] == nodeColor) {
-            dfsToConnectAbstractNodes(rworld, x, y+1, visited);
+        if(rworld.getMapColors()[x][y+1] == parentColor) {
+            dfsToConnectAbstractNodes(x, y+1, parentColor, visited);
         } else {
-            createUndirectedEdge(nodeColor, rworld.getMapColors()[x][y+1]);
+            createUndirectedEdge(parentColor, rworld.getMapColors()[x][y+1]);
         }
     }
 }
 
-void AbstractGraph::createAbstractGraph(RealWorld &rworld) {
-    createAbstractGraphNodes(rworld);
-    connectAbstractNodesWithUndirectedEdges(rworld);
+void AbstractGraph::createAbstractGraph() {
+    createAbstractGraphNodes();
+    connectAbstractNodesWithUndirectedEdges();
 }
 
 void AbstractGraph::printNode(int color) {
@@ -176,8 +173,13 @@ void AbstractGraph::printNode(int color) {
 double AbstractGraph::heuristic(int nodeColor) {
     const auto& centroidCurrent = colorAbstractNodeMap.find(nodeColor)->second.centroidRealNode;
     const auto &centroidGoal = colorAbstractNodeMap.find(goalColor)->second.centroidRealNode;
-    return sqrt(pow(centroidCurrent.first - centroidGoal.first, 2)
-                + pow(centroidCurrent.second - centroidGoal.second, 2));
+    /**
+     * Formula:
+     * ||delta x| - |delta y|| + 1.4142 * min(|delta x|, |delta y|)
+     */
+     double delta_x = abs(centroidCurrent.first - centroidGoal.first);
+     double delta_y = abs(centroidCurrent.second - centroidGoal.second);
+     return abs(delta_x - delta_y) + sqrt(2) * min(delta_x, delta_y);
 }
 
 void AbstractGraph::setGoalColor(int color) {
@@ -192,7 +194,7 @@ bool AbstractGraph::isGoalReached(int color) {
     return goalColor == color;
 }
 
-AbstractNode AbstractGraph::unrank(ulonglong rank) {
+AbstractNode& AbstractGraph::unrank(ulonglong rank) {
     assert(colorAbstractNodeMap.find((int)rank) != colorAbstractNodeMap.end());
     return colorAbstractNodeMap.find((int)rank)->second;
 }
@@ -220,4 +222,19 @@ vector<AbstractNode> AbstractGraph::getAllAbstractNodes() {
     }
     return move(allNodes);
 }
+
+/**
+ * Real World must contain the actual start (x,y)
+ */
+int AbstractGraph::getStartColor() {
+    int startX, startY;
+    rworld.getStart(startX, startY);
+    int startColor = rworld.getMapColors()[startX][startY];
+    return startColor;
+}
+
+unordered_map<int, AbstractNode>& AbstractGraph::accessAbstractGraph() {
+    return colorAbstractNodeMap;
+}
+
 
