@@ -7,10 +7,9 @@
 void AbstractGraph_2::createAbstractGraphNodes() {
     auto &abGraphMap = abGraph.accessAbstractGraph();
     int color = 0;
-    //cout<<"Total colors in ABG1 "<<abGraphMap.size()<<endl;
     for(int abGColor = 1; abGColor <= abGraphMap.size(); ++abGColor) {
         auto &abNode = abGraphMap.find(abGColor)->second;
-        if (abNode.abstractionColor >= 0) {
+        if (abNode.abstractionColor > 0) {
             continue;
         }
         ++color;
@@ -29,7 +28,7 @@ void AbstractGraph_2::createAbstractGraphNodes() {
          */
         for(auto connected1_itr = abNode.reachableNodes.begin(); connected1_itr != abNode.reachableNodes.end(); ++connected1_itr) {
             auto &abNode1 = abGraph.unrank(*connected1_itr);
-            if (abNode1.abstractionColor >= 0) {
+            if (abNode1.abstractionColor > 0) {
                 // already colored
                 /**
                  * This abstract graph node already belongs to a node of abstract graph 2
@@ -50,7 +49,7 @@ void AbstractGraph_2::createAbstractGraphNodes() {
                     continue;
                 }
                 auto &abNode2 = abGraph.unrank(*connected2_itr);
-                if (abNode2.abstractionColor >= 0) {
+                if (abNode2.abstractionColor > 0 || !abNode2.reachableNodes.contains(*connected1_itr)) {
                     // already colored
                     continue;
                 } else {
@@ -72,14 +71,14 @@ void AbstractGraph_2::createAbstractGraphNodes() {
                         continue;
                     }
                     auto &abNode3 = abGraph.unrank(*connected3_itr);
-                    if (abNode3.abstractionColor >= 0) {
+                    if (abNode3.abstractionColor > 0) {
                         // already colored
                         continue;
                     }
                     /**
                      * Is reachable from abNode1?
                      */
-                    if (abNode1.reachableNodes.contains(abNode3.color)) {
+                    if (abNode1.reachableNodes.contains(abNode3.color) && abNode.reachableNodes.contains(abNode3.color)) {
                         /// abNode3 in intersection of abNode1 and abNode2
                         /**
                          * We have found the 4 nodes clique
@@ -88,7 +87,6 @@ void AbstractGraph_2::createAbstractGraphNodes() {
                         abNode1.abstractionColor = color;
                         abNode2.abstractionColor = color;
                         abNode3.abstractionColor = color;
-
                         /**
                          * X and Y averages
                          */
@@ -112,6 +110,10 @@ void AbstractGraph_2::createAbstractGraphNodes() {
          * Form 3 clique or 2 clique or an orphan node if 4 clique not found
          */
         if (!found4Clique) {
+            /**
+             * For measuring averages across abstract regions. This is then used to calculate the central
+             * representation
+             */
             double xAvg, yAvg, xSum = 0, ySum = 0;
             int totalNodes = 0;
 
@@ -162,9 +164,10 @@ void AbstractGraph_2::createAbstractGraphNodes() {
             pair<double, double> representation = {xAvg, yAvg};
             colorAbstractNodeMap.insert({color, {color, abNode.centroidRealNode, representation, totalNodes}});
         }
+        assert(abNode.abstractionColor > 0);
     }
-    //cout<<"Total Colors in ABG2 "<<color<<endl;
 }
+
 
 /**
  * Given a AbstractGraph2 node N_2 (identified by its color).
@@ -189,7 +192,7 @@ void AbstractGraph_2::dfsToConnectAbstractNodes(const AbstractNode &abNode, int 
 
     for(const auto& connectedChildNodeColor : abNode.reachableNodes) {
         auto &connectedChildNode = abGraph.unrank(connectedChildNodeColor);
-        assert(connectedChildNode.abstractionColor >= 0);
+        assert(connectedChildNode.abstractionColor > 0);
         if (connectedChildNode.abstractionColor == abG2Color) {
             dfsToConnectAbstractNodes(connectedChildNode, abG2Color, visited);
         } else {
@@ -240,18 +243,6 @@ void AbstractGraph_2::createUndirectedEdge(int color1, int color2) {
 
 void AbstractGraph_2::setGoalColor(int color) {
     goalColor = color;
-}
-
-double AbstractGraph_2::heuristic(int nodeColor) {
-    const auto& representationCurrent = colorAbstractNodeMap.find(nodeColor)->second.representationCenter;
-    const auto &representationGoal = colorAbstractNodeMap.find(goalColor)->second.representationCenter;
-    /**
-     * Formula:
-     * ||delta x| - |delta y|| + 1.4142 * min(|delta x|, |delta y|)
-     */
-    double delta_x = abs(representationCurrent.first - representationGoal.first);
-    double delta_y = abs(representationCurrent.second - representationGoal.second);
-    return abs(delta_x - delta_y) + sqrt(2) * min(delta_x, delta_y);
 }
 
 Node AbstractGraph_2::createNode(int color) {

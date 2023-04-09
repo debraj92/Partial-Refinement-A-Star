@@ -11,9 +11,9 @@ class Abstraction {
 
 public:
 
-    virtual void setGoalColor(int color) = 0;
+    int goalX, goalY;
 
-    virtual double heuristic(int nodeColor) = 0;
+    virtual void setGoalColor(int color) = 0;
 
     virtual Node createNode(int color) = 0;
 
@@ -35,6 +35,26 @@ public:
     virtual unordered_map<int, AbstractNode>& accessAbstractGraph() = 0;
 
     virtual void createAbstractGraphNodes() = 0;
+
+    void setGoal(int goalx, int goaly) {
+        this->goalX = goalx;
+        this->goalY = goaly;
+    }
+
+    /**
+    * Formula:
+    * ||delta x| - |delta y|| + 1.4142 * min(|delta x|, |delta y|)
+    */
+    virtual double heuristic(int nodeColor) {
+        const auto& representationCurrent = unrank(nodeColor).representationCenter;
+        double delta_x = abs(representationCurrent.first - goalX);
+        double delta_y = abs(representationCurrent.second - goalY);
+        //return abs(abs(delta_x - delta_y) - sqrt(2) * max(delta_x, delta_y));
+        //return abs(abs(delta_x - delta_y) - sqrt(2 * delta_x * delta_y));
+        //return abs(delta_x - delta_y) + sqrt(2) * min(delta_x, delta_y);
+        return abs(delta_x - delta_y) + sqrt(2 * delta_x * delta_y);
+    };
+
 };
 
 #endif //INC_658PROJECT_ABSTRACTION_H

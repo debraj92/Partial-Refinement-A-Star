@@ -7,6 +7,7 @@
 
 #include <iostream>
 #include <unordered_set>
+#include <utility>
 
 using namespace std;
 
@@ -36,8 +37,8 @@ public:
     AbstractNode(){
     }
 
-    AbstractNode(int color_, pair<int, int> &centroidReal, pair<double, double> &centerRepresentation, int totalNodes) :
-    color(color_), centroidRealNode(centroidReal), representationCenter(centerRepresentation), totalNodesInRepresentation(totalNodes) {
+    AbstractNode(int color_, pair<int, int> centroidReal, pair<double, double> centerRepresentation, int totalNodes) :
+    color(color_), centroidRealNode(std::move(centroidReal)), representationCenter(std::move(centerRepresentation)), totalNodesInRepresentation(totalNodes) {
     }
 
     // have a direct edge

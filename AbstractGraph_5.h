@@ -50,8 +50,6 @@ public:
 
     void setGoalColor(int color);
 
-    double heuristic(int nodeColor);
-
     Node createNode(int color);
 
     bool isGoalReached(int color);
@@ -67,6 +65,8 @@ public:
     int getStartColor();
 
     unordered_map<int, AbstractNode>& accessAbstractGraph();
+
+    void printConnectedColors();
 };
 
 

@@ -65,8 +65,6 @@ public:
 
     void setGoalColor(int color);
 
-    double heuristic(int nodeColor);
-
     Node createNode(int color);
 
     bool isGoalReached(int color);

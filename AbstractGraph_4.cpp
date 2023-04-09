@@ -49,7 +49,7 @@ void AbstractGraph_4::createAbstractGraphNodes() {
                     continue;
                 }
                 auto &abNode2 = abGraph3.unrank(*connected2_itr);
-                if (abNode2.abstractionColor > 0) {
+                if (abNode2.abstractionColor > 0 || !abNode2.reachableNodes.contains(*connected1_itr)) {
                     // already colored
                     continue;
                 } else {
@@ -78,7 +78,7 @@ void AbstractGraph_4::createAbstractGraphNodes() {
                     /**
                      * Is reachable from abNode1?
                      */
-                    if (abNode1.reachableNodes.contains(abNode3.color)) {
+                    if (abNode1.reachableNodes.contains(abNode3.color) && abNode.reachableNodes.contains(abNode3.color)) {
                         /// abNode3 in intersection of abNode1 and abNode2
                         /**
                          * We have found the 4 nodes clique
@@ -180,7 +180,7 @@ void AbstractGraph_4::dfsToConnectAbstractNodes(const AbstractNode &abNode, int 
 
     for(const auto& connectedChildNodeColor : abNode.reachableNodes) {
         auto &connectedChildNode = abGraph3.unrank(connectedChildNodeColor);
-        assert(connectedChildNode.abstractionColor >= 0);
+        assert(connectedChildNode.abstractionColor > 0);
         if (connectedChildNode.abstractionColor == abG4Color) {
             dfsToConnectAbstractNodes(connectedChildNode, abG4Color, visited);
         } else {
@@ -212,18 +212,6 @@ void AbstractGraph_4::createUndirectedEdge(int color1, int color2) {
 
 void AbstractGraph_4::setGoalColor(int color) {
     goalColor = color;
-}
-
-double AbstractGraph_4::heuristic(int nodeColor) {
-    const auto& representationCurrent = colorAbstractNodeMap.find(nodeColor)->second.representationCenter;
-    const auto &representationGoal = colorAbstractNodeMap.find(goalColor)->second.representationCenter;
-    /**
-     * Formula:
-     * ||delta x| - |delta y|| + 1.4142 * min(|delta x|, |delta y|)
-     */
-    double delta_x = abs(representationCurrent.first - representationGoal.first);
-    double delta_y = abs(representationCurrent.second - representationGoal.second);
-    return abs(delta_x - delta_y) + sqrt(2) * min(delta_x, delta_y);
 }
 
 Node AbstractGraph_4::createNode(int color) {

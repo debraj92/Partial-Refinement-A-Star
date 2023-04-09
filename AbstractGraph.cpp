@@ -63,6 +63,20 @@ void AbstractGraph::dfs(int x, int y, int sectorBoundaryX, int sectorBoundaryY, 
     if (y < rworld.MAX_SIZE - 1) {
         dfs(x, y + 1, sectorBoundaryX, sectorBoundaryY, color);
     }
+
+    /// diagonal moves
+    if (x > 0 && y > 0) {
+        dfs(x - 1, y - 1, sectorBoundaryX, sectorBoundaryY, color);
+    }
+    if (x > 0 && y < rworld.MAX_SIZE - 1) {
+        dfs(x - 1, y + 1, sectorBoundaryX, sectorBoundaryY, color);
+    }
+    if (x < rworld.MAX_SIZE - 1 && y > 0) {
+        dfs(x + 1, y - 1, sectorBoundaryX, sectorBoundaryY, color);
+    }
+    if (x < rworld.MAX_SIZE - 1 && y < rworld.MAX_SIZE - 1) {
+        dfs(x + 1, y + 1, sectorBoundaryX, sectorBoundaryY, color);
+    }
 }
 
 int AbstractGraph::dfsInASector(int sectorStartX, int sectorStartY, int startColor) {
@@ -108,7 +122,6 @@ void AbstractGraph::connectAbstractNodesWithUndirectedEdges() {
             }
         }
         const auto& absNode = color_AbsNode.second;
-        assert(absNode.color == color_AbsNode.first);
         dfsToConnectAbstractNodes(absNode.centroidRealNode.first, absNode.centroidRealNode.second, absNode.color, visited);
         //printNode(absNode.color);
     }
@@ -158,6 +171,39 @@ void AbstractGraph::dfsToConnectAbstractNodes(int x, int y, const int parentColo
             createUndirectedEdge(parentColor, rworld.getMapColors()[x][y+1]);
         }
     }
+
+    /// Diagonal Moves
+    if (x > 0 && y > 0 && rworld.getMapColors()[x-1][y-1] != -1) {
+        if(rworld.getMapColors()[x-1][y-1] == parentColor) {
+            dfsToConnectAbstractNodes(x-1, y-1, parentColor, visited);
+        } else {
+            createUndirectedEdge(parentColor, rworld.getMapColors()[x-1][y-1]);
+        }
+    }
+
+    if (x > 0 && y < rworld.MAX_SIZE - 1 && rworld.getMapColors()[x-1][y+1] != -1) {
+        if(rworld.getMapColors()[x-1][y+1] == parentColor) {
+            dfsToConnectAbstractNodes(x-1, y+1, parentColor, visited);
+        } else {
+            createUndirectedEdge(parentColor, rworld.getMapColors()[x-1][y+1]);
+        }
+    }
+
+    if (x < rworld.MAX_SIZE - 1 && y > 0 && rworld.getMapColors()[x+1][y-1] != -1) {
+        if(rworld.getMapColors()[x+1][y-1] == parentColor) {
+            dfsToConnectAbstractNodes(x+1, y-1, parentColor, visited);
+        } else {
+            createUndirectedEdge(parentColor, rworld.getMapColors()[x+1][y-1]);
+        }
+    }
+
+    if (x < rworld.MAX_SIZE - 1 && y < rworld.MAX_SIZE - 1 && rworld.getMapColors()[x+1][y+1] != -1) {
+        if(rworld.getMapColors()[x+1][y+1] == parentColor) {
+            dfsToConnectAbstractNodes(x+1, y+1, parentColor, visited);
+        } else {
+            createUndirectedEdge(parentColor, rworld.getMapColors()[x+1][y+1]);
+        }
+    }
 }
 
 void AbstractGraph::createAbstractGraph() {
@@ -173,18 +219,6 @@ void AbstractGraph::printNode(int color) {
         cout<<childColor<<"  ";
     }
     cout<<endl;
-}
-
-double AbstractGraph::heuristic(int nodeColor) {
-    const auto& representationCurrent = colorAbstractNodeMap.find(nodeColor)->second.representationCenter;
-    const auto &representationGoal = colorAbstractNodeMap.find(goalColor)->second.representationCenter;
-    /**
-     * Formula:
-     * ||delta x| - |delta y|| + 1.4142 * min(|delta x|, |delta y|)
-     */
-     double delta_x = abs(representationCurrent.first - representationGoal.first);
-     double delta_y = abs(representationCurrent.second - representationGoal.second);
-     return abs(delta_x - delta_y) + sqrt(2) * min(delta_x, delta_y);
 }
 
 void AbstractGraph::setGoalColor(int color) {

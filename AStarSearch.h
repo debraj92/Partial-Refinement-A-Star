@@ -62,7 +62,7 @@ public:
      */
     bool searchPathInAbstractGraphWithAstar(unique_ptr<unordered_map<ulonglong,
                                             ulonglong>> &childParent,
-                                            const unique_ptr<unordered_set<ulonglong>> &abstractParentNodes,
+                                            unique_ptr<unordered_set<ulonglong>> &abstractParentNodes,
                                             int abstractionLevel,
                                             ulonglong parentGoalColor);
 

@@ -49,7 +49,7 @@ void AbstractGraph_5::createAbstractGraphNodes() {
                     continue;
                 }
                 auto &abNode2 = abGraph4.unrank(*connected2_itr);
-                if (abNode2.abstractionColor > 0) {
+                if (abNode2.abstractionColor > 0 || !abNode2.reachableNodes.contains(*connected1_itr)) {
                     // already colored
                     continue;
                 } else {
@@ -78,7 +78,7 @@ void AbstractGraph_5::createAbstractGraphNodes() {
                     /**
                      * Is reachable from abNode1?
                      */
-                    if (abNode1.reachableNodes.contains(abNode3.color)) {
+                    if (abNode1.reachableNodes.contains(abNode3.color) && abNode.reachableNodes.contains(abNode3.color)) {
                         /// abNode3 in intersection of abNode1 and abNode2
                         /**
                          * We have found the 4 nodes clique
@@ -180,7 +180,7 @@ void AbstractGraph_5::dfsToConnectAbstractNodes(const AbstractNode &abNode, int 
 
     for(const auto& connectedChildNodeColor : abNode.reachableNodes) {
         auto &connectedChildNode = abGraph4.unrank(connectedChildNodeColor);
-        assert(connectedChildNode.abstractionColor >= 0);
+        assert(connectedChildNode.abstractionColor > 0);
         if (connectedChildNode.abstractionColor == abG5Color) {
             dfsToConnectAbstractNodes(connectedChildNode, abG5Color, visited);
         } else {
@@ -213,18 +213,6 @@ void AbstractGraph_5::createUndirectedEdge(int color1, int color2) {
 
 void AbstractGraph_5::setGoalColor(int color) {
     goalColor = color;
-}
-
-double AbstractGraph_5::heuristic(int nodeColor) {
-    const auto& representationCurrent = colorAbstractNodeMap.find(nodeColor)->second.representationCenter;
-    const auto &representationGoal = colorAbstractNodeMap.find(goalColor)->second.representationCenter;
-    /**
-     * Formula:
-     * ||delta x| - |delta y|| + 1.4142 * min(|delta x|, |delta y|)
-     */
-    double delta_x = abs(representationCurrent.first - representationGoal.first);
-    double delta_y = abs(representationCurrent.second - representationGoal.second);
-    return abs(delta_x - delta_y) + sqrt(2) * min(delta_x, delta_y);
 }
 
 Node AbstractGraph_5::createNode(int color) {
@@ -278,4 +266,32 @@ int AbstractGraph_5::getStartColor() {
 
 unordered_map<int, AbstractNode> &AbstractGraph_5::accessAbstractGraph() {
     return colorAbstractNodeMap;
+}
+
+void AbstractGraph_5::printConnectedColors() {
+    for(int i=0; i<rworld.MAX_SIZE; ++i) {
+        for(int j=0; j<rworld.MAX_SIZE; ++j) {
+            int abG5Color = 0;
+            if (rworld.getRealMap()[i][j] == 0) {
+                auto abGColor = rworld.getMapColors()[i][j];
+                auto abG2Color = abGraph.unrank(abGColor).abstractionColor;
+                auto abG3Color = abGraph2.unrank(abG2Color).abstractionColor;
+                auto abG4Color = abGraph3.unrank(abG3Color).abstractionColor;
+                abG5Color = abGraph4.unrank(abG4Color).abstractionColor;
+            }
+            if(!abG5Color) {
+                cout<<".   ";
+            } else {
+                cout<<abG5Color;
+                if (abG5Color < 10) {
+                    cout<<"   ";
+                } else if (abG5Color < 100) {
+                    cout<<"  ";
+                } else if (abG5Color >= 100) {
+                    cout<<" ";
+                }
+            }
+        }
+        cout<<endl;
+    }
 }
