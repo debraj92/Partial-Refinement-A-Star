@@ -20,6 +20,8 @@ class RealWorld {
     vector<vector<int>> mapColors;
 
     int goalX, goalY;
+    int finalDestinationX, finalDestinationY;
+
     int startX, startY;
     int pathLength = 0;
 
@@ -41,6 +43,8 @@ public:
     void unrank(ulonglong rank, int &x, int &y);
 
     void setGoalState(int x, int y);
+
+    void setDestinationForHeuristics();
 
     double heuristic(int currentX, int currentY);
 

@@ -34,6 +34,13 @@ void AStarSearch::initStartState(int startX, int startY) {
 
 void AStarSearch::initGoalState(int goalX, int goalY) {
     realWorld->setGoalState(goalX, goalY);
+    realWorld->setDestinationForHeuristics();
+    abstractGraph->setGoal(goalX, goalY);
+    abstractGraph2->setGoal(goalX, goalY);
+    abstractGraph3->setGoal(goalX, goalY);
+    abstractGraph4->setGoal(goalX, goalY);
+    abstractGraph5->setGoal(goalX, goalY);
+
     abstractGraph->setGoalColor(realWorld->getMapColors()[goalX][goalY]);
     abstractGraph2->setGoalColor(
             abstractGraph->unrank(abstractGraph->getGoalColor()).abstractionColor
@@ -102,6 +109,7 @@ bool AStarSearch::searchPathInRealWorldWithAstar(unique_ptr<unordered_map<ulongl
      }
     // True Goal in PRA*
     int finalGoalColor = abstractGraph->getGoalColor();
+    double sqrt2 = sqrt(2);
     while(!openList.isEmpty()) {
         Node nextNode = openList.removeMinimum();
         closedList->insert(nextNode.rank);
@@ -179,6 +187,35 @@ bool AStarSearch::searchPathInRealWorldWithAstar(unique_ptr<unordered_map<ulongl
         ) {
             ulonglong childRank = realWorld->getRank(x, y+1);
             insertIntoOpenList(openList, closedList, childParent, childRank, nextNode, heuristicFunc, 1);
+        }
+
+        /// diagonal moves
+        if (x > 0 && y > 0 && realWorld->getRealMap()[x-1][y-1] == 0 &&
+        (abstractParentNodes->empty() || abstractParentNodes->contains(realWorld->getMapColors()[x-1][y-1]))
+        ) {
+            ulonglong childRank = realWorld->getRank(x-1, y-1);
+            insertIntoOpenList(openList, closedList, childParent, childRank, nextNode, heuristicFunc, sqrt2);
+        }
+
+        if (x > 0 && y < realWorld->MAX_SIZE - 1 && realWorld->getRealMap()[x-1][y+1] == 0 &&
+            (abstractParentNodes->empty() || abstractParentNodes->contains(realWorld->getMapColors()[x-1][y+1]))
+            ) {
+            ulonglong childRank = realWorld->getRank(x-1, y+1);
+            insertIntoOpenList(openList, closedList, childParent, childRank, nextNode, heuristicFunc, sqrt2);
+        }
+
+        if (x < realWorld->MAX_SIZE - 1 && y > 0 && realWorld->getRealMap()[x+1][y-1] == 0 &&
+            (abstractParentNodes->empty() || abstractParentNodes->contains(realWorld->getMapColors()[x+1][y-1]))
+            ) {
+            ulonglong childRank = realWorld->getRank(x+1, y-1);
+            insertIntoOpenList(openList, closedList, childParent, childRank, nextNode, heuristicFunc, sqrt2);
+        }
+
+        if (x < realWorld->MAX_SIZE - 1 && y < realWorld->MAX_SIZE - 1 && realWorld->getRealMap()[x+1][y+1] == 0 &&
+            (abstractParentNodes->empty() || abstractParentNodes->contains(realWorld->getMapColors()[x+1][y+1]))
+            ) {
+            ulonglong childRank = realWorld->getRank(x+1, y+1);
+            insertIntoOpenList(openList, closedList, childParent, childRank, nextNode, heuristicFunc, sqrt2);
         }
     }
     if (!isPathFound) {
@@ -318,7 +355,7 @@ void AStarSearch::copyRealWorld(vector<vector<int>> &copied) {
 
 ///////// AStar search in Abstract World //////////////////
 bool AStarSearch::searchPathInAbstractGraphWithAstar(unique_ptr<unordered_map<ulonglong, ulonglong>> &childParent,
-                                                     const unique_ptr<unordered_set<ulonglong>> &abstractParentNodes,
+                                                     unique_ptr<unordered_set<ulonglong>> &abstractParentNodes,
                                                      int abstractionLevel,
                                                      ulonglong parentGoalColor) {
     //cout<<"Searching in Abstract World"<<endl;

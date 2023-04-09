@@ -100,7 +100,7 @@ ulonglong RealWorld::getRank(int x, int y) {
 }
 
 double RealWorld::heuristic(int currentX, int currentY) {
-    return sqrt(pow(currentX - goalX, 2) + pow(currentY - goalY, 2));
+    return sqrt(pow(currentX - finalDestinationX, 2) + pow(currentY - finalDestinationY, 2));
 }
 
 void RealWorld::setGoalState(int x, int y) {
@@ -148,4 +148,9 @@ void RealWorld::setPathLength(int length) {
 
 int RealWorld::getPathLength() const {
     return pathLength;
+}
+
+void RealWorld::setDestinationForHeuristics() {
+    finalDestinationX = goalX;
+    finalDestinationY = goalY;
 }
