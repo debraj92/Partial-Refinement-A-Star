@@ -27,7 +27,7 @@ public:
 
     virtual int getStartColor() = 0;
 
-    virtual double getGCost(const AbstractNode &n1, const AbstractNode &n2) {
+    virtual inline double getGCost(const AbstractNode &n1, const AbstractNode &n2) {
         return sqrt(pow(n1.representationCenter.first - n2.representationCenter.first, 2) +
         pow(n1.representationCenter.second - n2.representationCenter.second, 2));
     };
@@ -47,7 +47,7 @@ public:
         double delta_x = abs(representationCurrent.first - goalX);
         double delta_y = abs(representationCurrent.second - goalY);
 
-        return abs(delta_x - delta_y) + sqrt(2 * delta_x * delta_y) * (1 - ((double) node.totalNodesInRepresentation / 32768));
+        return (abs(delta_x - delta_y) + sqrt(2 * delta_x * delta_y)) * (1 - ((double) node.totalNodesInRepresentation / 32768));
     };
 
     virtual double findShortestDistanceBetweenNodes(const AbstractNode &node1, const AbstractNode &node2) {

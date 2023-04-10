@@ -53,7 +53,7 @@ public:
      * For PRA*, provide non-empty abstractParentNodes. For A* this should be empty.
      */
     bool searchPathInRealWorldWithAstar(unique_ptr<unordered_map<ulonglong, ulonglong>> &childParent,
-                                        const unique_ptr<unordered_set<ulonglong>> &abstractParentNodes,
+                                        unique_ptr<unordered_set<ulonglong>> &abstractParentNodes,
                                         DataPoint &dataPoint);
 
     /**
@@ -64,11 +64,10 @@ public:
                                             ulonglong>> &childParent,
                                             unique_ptr<unordered_set<ulonglong>> &abstractParentNodes,
                                             int abstractionLevel,
-                                            ulonglong parentGoalColor);
+                                            ulonglong parentGoalColor,
+                                            int &startColor);
 
     bool searchAndTruncatePathInAbstractWorld (int K, unique_ptr<unordered_set<ulonglong>> &abstractParentNodes, ulonglong &parentGoalColor);
-
-    int getStartColorOfAbstraction(int abstractionLevel);
 
     int getGoalColorOfAbstraction(int abstractionLevel);
 
