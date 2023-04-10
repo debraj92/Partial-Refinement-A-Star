@@ -50,10 +50,9 @@ public:
         return (abs(delta_x - delta_y) + sqrt(2 * delta_x * delta_y)) * (1 - ((double) node.totalNodesInRepresentation / 32768));
     };
 
-    virtual double findShortestDistanceBetweenNodes(const AbstractNode &node1, const AbstractNode &node2) {
-        const auto &n1 = node1.representationCenter;
-        const auto &n2 = node2.representationCenter;
-        return sqrt(pow(n1.first - n2.first, 2) + pow(n1.second - n2.second,2));
+    virtual inline double findShortestDistanceBetweenNodes(const AbstractNode &node1, const AbstractNode &node2) {
+        return sqrt(pow(node1.representationCenter.first - node2.representationCenter.first, 2) +
+        pow(node1.representationCenter.second - node2.representationCenter.second,2));
     }
 
 };

@@ -44,11 +44,14 @@ void AbstractGraph_4::createAbstractGraphNodes() {
              * Find another connected node abNode2 and see if its already colored. If No, then this is at least a three clique
              * with abNode and abNode1. We need to ensure we are not picking abNode1 again.
             */
+            bool skip = true;
             for(auto connected2_itr = abNode.reachableNodes.begin(); connected2_itr != abNode.reachableNodes.end(); ++connected2_itr) {
-                if (*connected2_itr == *connected1_itr) {
-                    // Both are the same node.
+                if(*connected2_itr == *connected1_itr) {
+                    skip = false;
                     continue;
                 }
+                if (skip) continue;
+
                 auto &abNode2 = abGraph3.unrank(*connected2_itr);
                 if (abNode2.abstractionColor > 0 || !abNode2.reachableNodes.contains(*connected1_itr)) {
                     // already colored

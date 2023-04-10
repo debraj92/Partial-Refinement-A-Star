@@ -44,11 +44,14 @@ void AbstractGraph_2::createAbstractGraphNodes() {
              * with abNode and abNode1. We need to ensure we are not picking abNode1 again.
             */
             double edge1 = abGraph.findShortestDistanceBetweenNodes(abNode1, abNode);
+            bool skip = true;
             for(auto connected2_itr = abNode.reachableNodes.begin(); connected2_itr != abNode.reachableNodes.end(); ++connected2_itr) {
-                if (*connected2_itr == *connected1_itr) {
-                    // Both are the same node.
+                if(*connected2_itr == *connected1_itr) {
+                    skip = false;
                     continue;
                 }
+                if (skip) continue;
+
                 auto &abNode2 = abGraph.unrank(*connected2_itr);
                 if (abNode2.abstractionColor > 0 || !abNode2.reachableNodes.contains(*connected1_itr)) {
                     // already colored
