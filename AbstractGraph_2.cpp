@@ -43,6 +43,7 @@ void AbstractGraph_2::createAbstractGraphNodes() {
              * Find another connected node abNode2 and see if its already colored. If No, then this is at least a three clique
              * with abNode and abNode1. We need to ensure we are not picking abNode1 again.
             */
+            double edge1 = abGraph.findShortestDistanceBetweenNodes(abNode1, abNode);
             for(auto connected2_itr = abNode.reachableNodes.begin(); connected2_itr != abNode.reachableNodes.end(); ++connected2_itr) {
                 if (*connected2_itr == *connected1_itr) {
                     // Both are the same node.
@@ -52,14 +53,21 @@ void AbstractGraph_2::createAbstractGraphNodes() {
                 if (abNode2.abstractionColor > 0 || !abNode2.reachableNodes.contains(*connected1_itr)) {
                     // already colored
                     continue;
-                } else {
-                    // we have two different uncolored reachable nodes of abNode. These are also at distance 1 from abNode.
-                    // at least a 3 clique
-                    found3Clique = true;
-                    three_clique[0] = abNode.color;
-                    three_clique[1] = abNode1.color;
-                    three_clique[2] = abNode2.color;
                 }
+                double edge2 = abGraph.findShortestDistanceBetweenNodes(abNode2, abNode);
+                if (abGraph.findShortestDistanceBetweenNodes(abNode2, abNode1) < max(edge1, edge2)) {
+                    /**
+                     * 3 clique must have diagonal edge longer than side edges
+                     */
+                    continue;
+                }
+                // we have two different uncolored reachable nodes of abNode. These are also at distance 1 from abNode.
+                // at least a 3 clique
+                found3Clique = true;
+                three_clique[0] = abNode.color;
+                three_clique[1] = abNode1.color;
+                three_clique[2] = abNode2.color;
+
                 /**
                  * Find the last node which is in the intersection of abNode1 and abNode2. It should also not be abNode.
                  * For this, we check all reachable nodes from abNode2. Here we will reach abNode and may be abNode1.
@@ -78,29 +86,40 @@ void AbstractGraph_2::createAbstractGraphNodes() {
                     /**
                      * Is reachable from abNode1?
                      */
-                    if (abNode1.reachableNodes.contains(abNode3.color) && abNode.reachableNodes.contains(abNode3.color)) {
-                        /// abNode3 in intersection of abNode1 and abNode2
-                        /**
-                         * We have found the 4 nodes clique
-                         */
-                        abNode.abstractionColor = color;
-                        abNode1.abstractionColor = color;
-                        abNode2.abstractionColor = color;
-                        abNode3.abstractionColor = color;
-                        /**
-                         * X and Y averages
-                         */
-                        int totalNodes = abNode.totalNodesInRepresentation + abNode1.totalNodesInRepresentation +
-                                         abNode2.totalNodesInRepresentation + abNode3.totalNodesInRepresentation;
-                        double xAvg = (double) (abNode.getXTotalInRepresentation() + abNode1.getXTotalInRepresentation() +
-                                                abNode2.getXTotalInRepresentation() + abNode3.getXTotalInRepresentation()) / totalNodes;
-                        double yAvg = (double) (abNode.getYTotalInRepresentation() + abNode1.getYTotalInRepresentation() +
-                                                abNode2.getYTotalInRepresentation() + abNode3.getYTotalInRepresentation()) / totalNodes;
-                        pair<double, double> representation = {xAvg, yAvg};
-                        colorAbstractNodeMap.insert({color, {color, abNode.centroidRealNode, representation, totalNodes}});
-                        found4Clique = true;
-                        break;
+                    if (!abNode1.reachableNodes.contains(abNode3.color) || !abNode.reachableNodes.contains(abNode3.color)) {
+                        continue;
                     }
+
+                    double edge3 = abGraph.findShortestDistanceBetweenNodes(abNode1, abNode3);
+                    double edge4 = abGraph.findShortestDistanceBetweenNodes(abNode2, abNode3);
+                    if (abGraph.findShortestDistanceBetweenNodes(abNode, abNode3) < max(edge3, edge4)) {
+                        /**
+                        * 4 clique must have diagonal edge longer than side edges
+                        */
+                        continue;
+                    }
+
+                    /// abNode3 in intersection of abNode1 and abNode2
+                    /**
+                     * We have found the 4 nodes clique
+                     */
+                    abNode.abstractionColor = color;
+                    abNode1.abstractionColor = color;
+                    abNode2.abstractionColor = color;
+                    abNode3.abstractionColor = color;
+                    /**
+                     * X and Y averages
+                     */
+                    int totalNodes = abNode.totalNodesInRepresentation + abNode1.totalNodesInRepresentation +
+                                     abNode2.totalNodesInRepresentation + abNode3.totalNodesInRepresentation;
+                    double xAvg = (double) (abNode.getXTotalInRepresentation() + abNode1.getXTotalInRepresentation() +
+                                            abNode2.getXTotalInRepresentation() + abNode3.getXTotalInRepresentation()) / totalNodes;
+                    double yAvg = (double) (abNode.getYTotalInRepresentation() + abNode1.getYTotalInRepresentation() +
+                                            abNode2.getYTotalInRepresentation() + abNode3.getYTotalInRepresentation()) / totalNodes;
+                    pair<double, double> representation = {xAvg, yAvg};
+                    colorAbstractNodeMap.insert({color, {color, abNode.centroidRealNode, representation, totalNodes}});
+                    found4Clique = true;
+                    break;
                 }
                 if (found4Clique) break;
             }

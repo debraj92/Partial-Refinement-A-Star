@@ -41,19 +41,20 @@ public:
         this->goalY = goaly;
     }
 
-    /**
-    * Formula:
-    * ||delta x| - |delta y|| + 1.4142 * min(|delta x|, |delta y|)
-    */
     virtual double heuristic(int nodeColor) {
-        const auto& representationCurrent = unrank(nodeColor).representationCenter;
+        const auto &node = unrank(nodeColor);
+        const auto& representationCurrent = node.representationCenter;
         double delta_x = abs(representationCurrent.first - goalX);
         double delta_y = abs(representationCurrent.second - goalY);
-        //return abs(abs(delta_x - delta_y) - sqrt(2) * max(delta_x, delta_y));
-        //return abs(abs(delta_x - delta_y) - sqrt(2 * delta_x * delta_y));
-        //return abs(delta_x - delta_y) + sqrt(2) * min(delta_x, delta_y);
-        return abs(delta_x - delta_y) + sqrt(2 * delta_x * delta_y);
+
+        return abs(delta_x - delta_y) + sqrt(2 * delta_x * delta_y) * (1 - ((double) node.totalNodesInRepresentation / 16384));
     };
+
+    virtual double findShortestDistanceBetweenNodes(const AbstractNode &node1, const AbstractNode &node2) {
+        const auto &n1 = node1.representationCenter;
+        const auto &n2 = node2.representationCenter;
+        return sqrt(pow(n1.first - n2.first, 2) + pow(n1.second - n2.second,2));
+    }
 
 };
 
