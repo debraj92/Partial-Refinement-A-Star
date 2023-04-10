@@ -190,7 +190,7 @@ void AbstractGraph_3::createAbstractGraphNodes() {
     //cout<<"Total Colors in ABG3 "<<color<<endl;
 }
 
-void AbstractGraph_3::dfsToConnectAbstractNodes(const AbstractNode &abNode, int abG3Color, unordered_set<int> visited) {
+void AbstractGraph_3::dfsToConnectAbstractNodes(const AbstractNode &abNode, int abG3Color, unordered_set<int> &visited) {
     if (!colorAbstractNodeMap.contains(abG3Color)) {
         return;
     }

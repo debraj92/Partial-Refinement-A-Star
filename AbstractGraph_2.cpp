@@ -202,7 +202,7 @@ void AbstractGraph_2::createAbstractGraphNodes() {
  * abG2Color is the color of the AbstractGraph2 node which is the parent of the AbstractGraph nodes
  * AbstractNode refers to AbstractGraph node.
  */
-void AbstractGraph_2::dfsToConnectAbstractNodes(const AbstractNode &abNode, int abG2Color, unordered_set<int> visited) {
+void AbstractGraph_2::dfsToConnectAbstractNodes(const AbstractNode &abNode, int abG2Color, unordered_set<int> &visited) {
     if (!colorAbstractNodeMap.contains(abG2Color)) {
         return;
     }

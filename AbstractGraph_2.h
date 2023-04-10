@@ -28,7 +28,7 @@ class AbstractGraph_2 : public Abstraction {
 
     int goalColor;
 
-    void dfsToConnectAbstractNodes(const AbstractNode &abNode, int color, unordered_set<int> visited);
+    void dfsToConnectAbstractNodes(const AbstractNode &abNode, int color, unordered_set<int> &visited);
 
     void createUndirectedEdge(int color1, int color2);
 

@@ -189,7 +189,7 @@ void AbstractGraph_5::createAbstractGraphNodes() {
     }
 }
 
-void AbstractGraph_5::dfsToConnectAbstractNodes(const AbstractNode &abNode, int abG5Color, unordered_set<int> visited) {
+void AbstractGraph_5::dfsToConnectAbstractNodes(const AbstractNode &abNode, int abG5Color, unordered_set<int> &visited) {
     if (!colorAbstractNodeMap.contains(abG5Color)) {
         return;
     }
@@ -219,7 +219,7 @@ void AbstractGraph_5::createUndirectedEdges() {
         auto abG2Color = abGraph.unrank(abGColor).abstractionColor;
         auto abG3Color = abGraph2.unrank(abG2Color).abstractionColor;
         auto abG4Color = abGraph3.unrank(abG3Color).abstractionColor;
-        if (!visited.contains(abG3Color)) {
+        if (!visited.contains(abG4Color)) {
             const auto &abG4Node = abGraph4.unrank(abG4Color);
             dfsToConnectAbstractNodes(abG4Node, abG5Color, visited);
         }

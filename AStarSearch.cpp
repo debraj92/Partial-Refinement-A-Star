@@ -68,8 +68,6 @@ void AStarSearch::createRealWorld(const string &fileName) {
 bool AStarSearch::searchPathInRealWorldWithAstar(unique_ptr<unordered_map<ulonglong, ulonglong>> &childParent,
                                                  unique_ptr<unordered_set<ulonglong>> &abstractParentNodes,
                                                  DataPoint &dataPoint) {
-    //cout<<"Searching in Real World"<<endl;
-
     /**
      * Generalizes the heuristic function with a common interface
      */
@@ -484,7 +482,7 @@ bool AStarSearch::partialRefinementAStarSearch(int K, DataPoint &dataPoint) {
             /**
              * Target is centroid of Kth node
              */
-            realWorld->setGoalState((int)round(absNextNode.representationCenter.first), (int)round(absNextNode.representationCenter.second));
+            realWorld->setGoalState(absNextNode.centroidRealNode.first, absNextNode.centroidRealNode.second);
         } else {
             /**
              * Target abstract node is the goal node. Restore actual destination coordinates in real world
@@ -528,8 +526,8 @@ bool AStarSearch::partialRefinementAStarSearch(int K, DataPoint &dataPoint) {
     return isPathFound;
 }
 
-unique_ptr<AbstractGraph> &AStarSearch::accessAbstractGraph() {
-    return abstractGraph;
+unique_ptr<AbstractGraph_4> &AStarSearch::accessAbstractGraph4() {
+    return abstractGraph4;
 }
 
 unique_ptr<RealWorld> &AStarSearch::accessRealWorld() {
@@ -595,16 +593,14 @@ AStarSearch::searchAndTruncatePathInAbstractWorld(int K, unique_ptr<unordered_se
         // PRA*(Inf) uses K = 10000
         int goalColorAbstraction = getGoalColorOfAbstraction(abstractionLevel);
         int i = 1;
-        for(; i<K && currentColor != goalColorAbstraction; ++i) {
+        for(; i<=K && currentColor != goalColorAbstraction; ++i) {
             currentColor = path->find(currentColor)->second;
             abstractParentNodes->insert(currentColor);
         }
-        if (i < K) {
+        if (currentColor == goalColorAbstraction && !abstractParentNodes->contains(goalColorAbstraction)) {
             abstractParentNodes->insert(goalColorAbstraction);
-            parentGoalColor = goalColorAbstraction;
-        } else {
-            parentGoalColor = currentColor;
         }
+        parentGoalColor = currentColor;
         path->clear();
         --abstractionLevel;
     }

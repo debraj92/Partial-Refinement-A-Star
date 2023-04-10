@@ -77,7 +77,7 @@ public:
 
     void printAbstractPath(unique_ptr<unordered_map<ulonglong, ulonglong>> &childParent, ulonglong rootRank, ulonglong destinationRank, Abstraction *abstraction);
 
-    unique_ptr<AbstractGraph>& accessAbstractGraph();
+    unique_ptr<AbstractGraph_4>& accessAbstractGraph4();
     unique_ptr<RealWorld>& accessRealWorld();
 
     void printPathNodes(unique_ptr<unordered_map<ulonglong, ulonglong>> &childParent, ulonglong rootRank, ulonglong destinationRank);

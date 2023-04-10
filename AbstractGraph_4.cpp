@@ -190,7 +190,7 @@ void AbstractGraph_4::createAbstractGraphNodes() {
     }
 }
 
-void AbstractGraph_4::dfsToConnectAbstractNodes(const AbstractNode &abNode, int abG4Color, unordered_set<int> visited) {
+void AbstractGraph_4::dfsToConnectAbstractNodes(const AbstractNode &abNode, int abG4Color, unordered_set<int> &visited) {
     if (!colorAbstractNodeMap.contains(abG4Color)) {
         return;
     }
