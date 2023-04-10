@@ -47,7 +47,7 @@ public:
         double delta_x = abs(representationCurrent.first - goalX);
         double delta_y = abs(representationCurrent.second - goalY);
 
-        return abs(delta_x - delta_y) + sqrt(2 * delta_x * delta_y) * (1 - ((double) node.totalNodesInRepresentation / 16384));
+        return abs(delta_x - delta_y) + sqrt(2 * delta_x * delta_y) * (1 - ((double) node.totalNodesInRepresentation / 32768));
     };
 
     virtual double findShortestDistanceBetweenNodes(const AbstractNode &node1, const AbstractNode &node2) {
