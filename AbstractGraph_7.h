@@ -45,7 +45,7 @@ class AbstractGraph_7 : public Abstraction {
 
     void createUndirectedEdges();
 
-    void printNode(int color);
+    void printNode(ulonglong color);
 
 public:
 

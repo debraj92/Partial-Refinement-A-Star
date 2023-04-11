@@ -82,7 +82,13 @@ public:
 
     void printAbstractPath(unique_ptr<unordered_map<ulonglong, ulonglong>> &childParent, ulonglong rootRank, ulonglong destinationRank, Abstraction *abstraction);
 
+    unique_ptr<AbstractGraph_2>& accessAbstractGraph2();
+    unique_ptr<AbstractGraph_3>& accessAbstractGraph3();
     unique_ptr<AbstractGraph_4>& accessAbstractGraph4();
+    unique_ptr<AbstractGraph_5>& accessAbstractGraph5();
+
+    void copyAbstractNodesFromLevel(int abstractLevel, vector<AbstractNode> &abstractNodes);
+
     unique_ptr<RealWorld>& accessRealWorld();
 
     void printPathNodes(unique_ptr<unordered_map<ulonglong, ulonglong>> &childParent, ulonglong rootRank, ulonglong destinationRank);
@@ -104,6 +110,7 @@ public:
     void storeInitialState(InitialState &initState);
     void restoreInitialState(InitialState &initState);
 
+    bool checkPathExists(int &approxLength);
 
 };
 

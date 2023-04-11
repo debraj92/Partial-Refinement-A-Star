@@ -395,6 +395,7 @@ bool AStarSearch::searchPathInAbstractGraphWithAstar(unique_ptr<unordered_map<ul
 
     unique_ptr<unordered_set<ulonglong>> closedList = make_unique<unordered_set<ulonglong>>();
     startColor = abstraction->getStartColor();
+
     if(startColor == -1) {
         cout<<"Abstract Path Not Found"<<endl;
         return false;
@@ -431,6 +432,7 @@ bool AStarSearch::searchPathInAbstractGraphWithAstar(unique_ptr<unordered_map<ul
              */
             //finalizeNodeLinks(childParent, closedList);
             auto solutionLength = reverseNodeLinks(nextNode.rank, childParent);
+            abstraction->setSolutionLength(solutionLength);
             //cout<<"Path Length Abstract World "<<solutionLength<<endl;
             isPathFound = true;
             break;
@@ -447,7 +449,7 @@ bool AStarSearch::searchPathInAbstractGraphWithAstar(unique_ptr<unordered_map<ul
         }
     }
     if(!isPathFound) {
-        cout<<"Path Not Found"<<endl;
+        cout<<"Abstract Path Not Found"<<endl;
     }
 
     auto t2 = high_resolution_clock::now();
@@ -527,8 +529,8 @@ bool AStarSearch::partialRefinementAStarSearch(int K, DataPoint &dataPoint) {
     auto time_in_ms = duration_cast<chrono::milliseconds>(t2 - t1);
 
     if (isPathFound) {
-        cout<<"PRA* found a path. Total length of path in real world "<<realWorld->getPathLength()<<endl;
-        cout<<"PRA* execution time "<<time_in_ms.count()<<endl;
+        //cout<<"PRA* found a path. Total length of path in real world "<<realWorld->getPathLength()<<endl;
+        //cout<<"PRA* execution time "<<time_in_ms.count()<<endl;
         //printPathNodes(pathRealWorld, realWorld->getRank(initialState.startX, initialState.startY),
         //               realWorld->getRank(initialState.goalX, initialState.goalY));
         //printRealPath(pathRealWorld, realWorld->getRank(initialState.startX, initialState.startY),
@@ -539,10 +541,6 @@ bool AStarSearch::partialRefinementAStarSearch(int K, DataPoint &dataPoint) {
     }
     restoreInitialState(initialState);
     return isPathFound;
-}
-
-unique_ptr<AbstractGraph_4> &AStarSearch::accessAbstractGraph4() {
-    return abstractGraph4;
 }
 
 unique_ptr<RealWorld> &AStarSearch::accessRealWorld() {
@@ -641,4 +639,58 @@ ulonglong AStarSearch::getGoalColorOfAbstraction(int abstractionLevel) {
             return abstractGraph7->getGoalColor();
     }
     throw std::runtime_error("Invalid Abstraction Level");
+}
+
+/**
+ * Check pathability at abstraction level 7
+ */
+bool AStarSearch::checkPathExists(int &approxLength) {
+    unique_ptr<unordered_set<ulonglong>> dummy = make_unique<unordered_set<ulonglong>>();
+    unique_ptr<unordered_map<ulonglong, ulonglong>> pathAbstractWorld = make_unique<unordered_map<ulonglong, ulonglong>>();
+    ulonglong startColor = 0;
+    bool isFound = searchPathInAbstractGraphWithAstar(pathAbstractWorld, dummy, 7, 0, startColor);
+    approxLength = (int)round(abstractGraph7->getSolutionLength() * 19.6);
+    return isFound;
+}
+
+unique_ptr<AbstractGraph_2> &AStarSearch::accessAbstractGraph2() {
+    return abstractGraph2;
+}
+
+unique_ptr<AbstractGraph_3> &AStarSearch::accessAbstractGraph3() {
+    return abstractGraph3;
+}
+
+unique_ptr<AbstractGraph_4> &AStarSearch::accessAbstractGraph4() {
+    return abstractGraph4;
+}
+
+unique_ptr<AbstractGraph_5> &AStarSearch::accessAbstractGraph5() {
+    return abstractGraph5;
+}
+
+void AStarSearch::copyAbstractNodesFromLevel(int abstractLevel, vector<AbstractNode> &abstractNodes) {
+    switch (abstractLevel) {
+        case 1:
+            abstractNodes = abstractGraph->getAllAbstractNodes();
+            break;
+        case 2:
+            abstractNodes = abstractGraph2->getAllAbstractNodes();
+            break;
+        case 3:
+            abstractNodes = abstractGraph3->getAllAbstractNodes();
+            break;
+        case 4:
+            abstractNodes = abstractGraph4->getAllAbstractNodes();
+            break;
+        case 5:
+            abstractNodes = abstractGraph5->getAllAbstractNodes();
+            break;
+        case 6:
+            abstractNodes = abstractGraph6->getAllAbstractNodes();
+            break;
+        case 7:
+            abstractNodes = abstractGraph7->getAllAbstractNodes();
+            break;
+    }
 }

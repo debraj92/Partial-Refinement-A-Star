@@ -11,7 +11,7 @@ class Abstraction {
 
 public:
 
-    int goalX, goalY;
+    int goalX, goalY, solutionLength;
 
     virtual void setGoalColor(ulonglong color) = 0;
 
@@ -54,6 +54,14 @@ public:
     virtual inline double findShortestDistanceBetweenNodes(const AbstractNode &node1, const AbstractNode &node2) {
         return sqrt(pow(node1.representationCenter.first - node2.representationCenter.first, 2) +
         pow(node1.representationCenter.second - node2.representationCenter.second,2));
+    }
+
+    void setSolutionLength(int solnLength) {
+        this->solutionLength = solnLength;
+    }
+
+    int getSolutionLength() {
+        return this->solutionLength;
     }
 
 };

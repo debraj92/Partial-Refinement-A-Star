@@ -21,12 +21,16 @@ void RealWorld::readMapFromFile(const string &fileName) {
           * Now we have to read 512 X 512 data
           */
          line = "";
-        realMap.reserve(MAX_SIZE);
-        mapColors.reserve(MAX_SIZE);
+         if(realMap.capacity() == 0) {
+             realMap.resize(MAX_SIZE);
+             mapColors.resize(MAX_SIZE);
+         }
         int row = 0, col = 0;
         while (std::getline(file, line)) {
-            realMap[row].reserve(MAX_SIZE);
-            mapColors[row].reserve(MAX_SIZE);
+            if(realMap[row].capacity() == 0) {
+                realMap[row].resize(MAX_SIZE);
+                mapColors[row].resize(MAX_SIZE);
+            }
             for(char x: line) {
                 if(x == '.') {
                     realMap[row][col] = 0;
@@ -154,3 +158,4 @@ void RealWorld::setDestinationForHeuristics() {
     finalDestinationX = goalX;
     finalDestinationY = goalY;
 }
+

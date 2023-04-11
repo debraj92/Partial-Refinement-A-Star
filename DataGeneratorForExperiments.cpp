@@ -5,6 +5,11 @@
 #include "DataGeneratorForExperiments.h"
 #include <iostream>
 #include <filesystem>
+#include <fstream>
+
+#include <string>
+#include <stdio.h>
+#include <time.h>
 
 void DataGeneratorForExperiments::populateFileNames() {
     std::string path = "/Users/debrajray/MyComputer/658/project/baldurGate/";
@@ -18,71 +23,138 @@ void DataGeneratorForExperiments::populateFileNames() {
 void DataGeneratorForExperiments::test() {
     populateFileNames();
     populateDataPoints();
+    writeToFile();
 }
 
 void DataGeneratorForExperiments::populateDataPoints() {
     unique_ptr<unordered_set<ulonglong>> dummy = make_unique<unordered_set<ulonglong>>();
-    bins.resize(11);
+    bins.resize(13);
     int totalPaths = 0;
+    unique_ptr<unordered_map<ulonglong, ulonglong>> pathRealWorld = make_unique<unordered_map<ulonglong, ulonglong>>();
     for(const string& fileName : fileNames) {
-        unique_ptr<unordered_map<ulonglong, ulonglong>> pathRealWorld = make_unique<unordered_map<ulonglong, ulonglong>>();
-        unique_ptr<unordered_map<ulonglong, ulonglong>> pathAbstractWorld = make_unique<unordered_map<ulonglong, ulonglong>>();
+        cout<<"Map "<<fileName<<endl;
+        AStarSearch aStar;
         aStar.createAbstractGraph(fileName);
-        auto abstractNodes = aStar.accessAbstractGraph()->getAllAbstractNodes();
-        /**
-         * Start and End nodes are picked from the centroid of the abstract nodes
-         */
-        for(int fromNodeIdx = 0; fromNodeIdx < abstractNodes.size() - 1; ++fromNodeIdx) {
-            for(int toNodeIdx = fromNodeIdx + 1; toNodeIdx < abstractNodes.size(); ++toNodeIdx) {
-                DataPoint dataPoint(
-                        abstractNodes[fromNodeIdx].centroidRealNode.first,
-                        abstractNodes[fromNodeIdx].centroidRealNode.second,
-                        abstractNodes[toNodeIdx].centroidRealNode.first,
-                        abstractNodes[toNodeIdx].centroidRealNode.second,
-                        fileName
-                        );
-                aStar.initStartState(abstractNodes[fromNodeIdx].centroidRealNode.first, abstractNodes[fromNodeIdx].centroidRealNode.second);
-                aStar.initGoalState(abstractNodes[toNodeIdx].centroidRealNode.first, abstractNodes[toNodeIdx].centroidRealNode.second);
-                pathRealWorld->clear();
-                aStar.accessRealWorld()->setPathLength(0);
-                if (aStar.searchPathInRealWorldWithAstar(pathRealWorld, dummy, dataPoint)) {
-                    if (dataPoint.aStarPathLength < 20 || dataPoint.aStarPathLength >= 550) {
-                        continue;
+        vector<AbstractNode> abstractNodes;
+        for(int abLevel = 5; abLevel >= 2; --abLevel) {
+            aStar.copyAbstractNodesFromLevel(abLevel, abstractNodes);
+            /**
+            * Start and End nodes are picked from the centroid of the abstract nodes
+            */
+            bool skipping = false;
+            int countSkip1 = 0;
+            for(int fromNodeIdx = 0; fromNodeIdx < abstractNodes.size() - 1; ++fromNodeIdx) {
+                int countSkip2 = 0;
+                if(skipping) {
+                    if(countSkip1 > 200) {
+                        break;
                     }
-                    int binIdx = floor(dataPoint.aStarPathLength / 50);
-                    if(bins[binIdx] > 25) {
-                        continue;
-                    }
-                    // 11,000 data points in total
-                    // 5500 per game of 2 games
-                    if (totalPaths >= 5500) {
-                        /**
-                         * Termination
-                         */
-                        return;
-                    }
-                    ++bins[binIdx];
-                    ++totalPaths;
-                    cout<<"A* path found, path length "<<dataPoint.aStarPathLength<<" Exec time "<<dataPoint.aStarExecTime<<endl;
-                    if (!aStar.partialRefinementAStarSearch(0, dataPoint)) {
-                        throw std::runtime_error("PRA*(Inf) did not find a path, however PATH MUST EXIST");
-                    }
-                    if (!aStar.partialRefinementAStarSearch(2, dataPoint)) {
-                        throw std::runtime_error("PRA*(2) did not find a path, however PATH MUST EXIST");
-                    }
-                    if (!aStar.partialRefinementAStarSearch(4, dataPoint)) {
-                        throw std::runtime_error("PRA*(4) did not find a path, however PATH MUST EXIST");
-                    }
-                    if (!aStar.partialRefinementAStarSearch(8, dataPoint)) {
-                        throw std::runtime_error("PRA*(8) did not find a path, however PATH MUST EXIST");
-                    }
-                    if (!aStar.partialRefinementAStarSearch(16, dataPoint)) {
-                        throw std::runtime_error("PRA*(16) did not find a path, however PATH MUST EXIST");
+                    ++countSkip1;
+                }
+                for(int toNodeIdx = fromNodeIdx + 1; toNodeIdx < abstractNodes.size(); ++toNodeIdx) {
+                    DataPoint dataPoint(
+                            abstractNodes[fromNodeIdx].centroidRealNode.first,
+                            abstractNodes[fromNodeIdx].centroidRealNode.second,
+                            abstractNodes[toNodeIdx].centroidRealNode.first,
+                            abstractNodes[toNodeIdx].centroidRealNode.second,
+                            fileName
+                    );
+                    aStar.initStartState(abstractNodes[fromNodeIdx].centroidRealNode.first, abstractNodes[fromNodeIdx].centroidRealNode.second);
+                    aStar.initGoalState(abstractNodes[toNodeIdx].centroidRealNode.first, abstractNodes[toNodeIdx].centroidRealNode.second);
+                    int pathLengthApprox;
+                    if (aStar.checkPathExists(pathLengthApprox)) {
+                        if(checkSkip(pathLengthApprox)) {
+                            if(!skipping) {
+                                cout<<"SKIP"<<endl;
+                            }
+                            if(countSkip2 > 200) {
+                                break;
+                            }
+                            skipping = true;
+                            ++countSkip2;
+                            continue;
+                        }
+                        pathRealWorld->clear();
+                        aStar.accessRealWorld()->setPathLength(0);
+                        aStar.searchPathInRealWorldWithAstar(pathRealWorld, dummy, dataPoint, 0);
+                        if(checkSkip(dataPoint.aStarPathLength)) {
+                            if(!skipping) {
+                                cout<<"SKIP"<<endl;
+                            }
+                            if(countSkip2 > 200) {
+                                break;
+                            }
+                            skipping = true;
+                            ++countSkip2;
+                            continue;
+                        }
+                        skipping = false;
+                        // 11,000 data points in total
+                        // 5500 per game of 2 games: Baldur Gate and Warcraft
+                        if (totalPaths >= 4000) {
+                            /**
+                             * Termination
+                             */
+                            cout<<"Done with data collection "<<endl;
+                            return;
+                        }
+                        if(totalPaths % 100 == 0) {
+                            cout<<"Completed "<<(totalPaths * 100 / 4000)<<"%, totalPaths: "<<totalPaths<<", Time: ";
+                            printTime();
+                            cout<<endl;
+                        }
+                        int binIdx = floor(dataPoint.aStarPathLength / 50);
+                        ++bins[binIdx];
+                        ++totalPaths;
+                        cout<<"From: ("<<abstractNodes[fromNodeIdx].centroidRealNode.first<<", "<<abstractNodes[fromNodeIdx].centroidRealNode.second<<")  ";
+                        cout<<"To: ("<<abstractNodes[toNodeIdx].centroidRealNode.first<<", "<<abstractNodes[toNodeIdx].centroidRealNode.second<<")  ";
+                        cout<<"A* Path Length "<<dataPoint.aStarPathLength<<" Time "<<dataPoint.aStarExecTime<<endl;
+                        //cout<<"A* path found, path length "<<dataPoint.aStarPathLength<<" Exec time "<<dataPoint.aStarExecTime<<endl;
+                        if (!aStar.partialRefinementAStarSearch(10000, dataPoint)) {
+                            throw std::runtime_error("PRA*(Inf) did not find a path, however PATH MUST EXIST");
+                        }
+                        if (!aStar.partialRefinementAStarSearch(2, dataPoint)) {
+                            throw std::runtime_error("PRA*(2) did not find a path, however PATH MUST EXIST");
+                        }
+                        if (!aStar.partialRefinementAStarSearch(4, dataPoint)) {
+                            throw std::runtime_error("PRA*(4) did not find a path, however PATH MUST EXIST");
+                        }
+                        if (!aStar.partialRefinementAStarSearch(8, dataPoint)) {
+                            throw std::runtime_error("PRA*(8) did not find a path, however PATH MUST EXIST");
+                        }
+                        if (!aStar.partialRefinementAStarSearch(16, dataPoint)) {
+                            throw std::runtime_error("PRA*(16) did not find a path, however PATH MUST EXIST");
+                        }
+                        dataPoints.emplace_back(dataPoint);
                     }
                 }
             }
         }
-        // TODO: Temporary
-        break;
     }
+}
+
+void DataGeneratorForExperiments::writeToFile() {
+    cout<<"Writing data:"<<endl;
+    ofstream myfile;
+    myfile.open ("/Users/debrajray/MyComputer/658/project/project_out.csv");
+    for(const auto &datapoint: dataPoints) {
+        myfile<<datapoint.aStarPathLength<<","<<datapoint.aStarExecTime<<","<<datapoint.praStar_Inf_PathLength<<","<<datapoint.praStar_Inf_ExecTime<<","<<datapoint.praStar_Inf_PathLength_ratio<<",";
+        myfile<<datapoint.praStar_K16_PathLength<<","<<datapoint.praStar_K16_ExecTime<<","<<datapoint.praStar_K16_PathLength_ratio<<datapoint.praStar_K8_PathLength<<","<<datapoint.praStar_K8_ExecTime<<","<<datapoint.praStar_K8_PathLength_ratio<<",";
+        myfile<<datapoint.praStar_K4_PathLength<<","<<datapoint.praStar_K4_ExecTime<<","<<datapoint.praStar_K4_PathLength_ratio<<","<<datapoint.praStar_K2_PathLength<<","<<datapoint.praStar_K2_ExecTime<<","<<datapoint.praStar_K2_PathLength_ratio<<endl;
+    }
+    myfile.close();
+}
+
+void DataGeneratorForExperiments::printTime() {
+    time_t     now = time(0);
+    struct tm  tstruct;
+    char       buf[80];
+    tstruct = *localtime(&now);
+    strftime(buf, sizeof(buf), "%Y/%m/%d  %X", &tstruct);
+    cout<<buf;
+}
+
+bool DataGeneratorForExperiments::checkSkip(int pathLength) {
+    int binIdx = floor(pathLength / 50);
+    return (pathLength < 15 || pathLength >= 650) || (bins[binIdx] > 350);
 }

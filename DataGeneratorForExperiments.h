@@ -27,10 +27,13 @@ class DataGeneratorForExperiments {
      */
     vector<int> bins;
 
-    AStarSearch aStar;
-
     void populateFileNames();
     void populateDataPoints();
+    void writeToFile();
+
+    void printTime();
+
+    bool checkSkip(int pathLength);
 
 public:
 

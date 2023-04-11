@@ -5,10 +5,10 @@
 #include "AbstractGraph_7.h"
 
 void AbstractGraph_7::createAbstractGraphNodes() {
-    auto &abGraph4Map = abGraph6.accessAbstractGraph();
+    auto &abGraph6Map = abGraph6.accessAbstractGraph();
     ulonglong color = 0;
-    for(ulonglong abGColor = 1; abGColor <= abGraph4Map.size(); ++abGColor) {
-        auto &abNode = abGraph4Map.find(abGColor)->second;
+    for(ulonglong abGColor = 1; abGColor <= abGraph6Map.size(); ++abGColor) {
+        auto &abNode = abGraph6Map.find(abGColor)->second;
         if (abNode.abstractionColor > 0) {
             continue;
         }
@@ -238,7 +238,7 @@ void AbstractGraph_7::createUndirectedEdges() {
             const auto &abG6Node = abGraph6.unrank(abG6Color);
             dfsToConnectAbstractNodes(abG6Node, abG7Color, visited);
         }
-        //printNode(abG6Color);
+        //printNode(abG7Color);
         ++abG7Color;
     }
 }
@@ -282,7 +282,7 @@ void AbstractGraph_7::createAbstractGraph() {
     createUndirectedEdges();
 }
 
-void AbstractGraph_7::printNode(int color) {
+void AbstractGraph_7::printNode(ulonglong color) {
     const auto &color_AbsNode = colorAbstractNodeMap.find(color);
     cout<<"Color: "<<color_AbsNode->first<<", Connected Colors: ";
     for(const auto& childColor: color_AbsNode->second.reachableNodes) {
@@ -310,24 +310,25 @@ unordered_map<ulonglong, AbstractNode> &AbstractGraph_7::accessAbstractGraph() {
 void AbstractGraph_7::printConnectedColors() {
     for(int i=0; i<rworld.MAX_SIZE; ++i) {
         for(int j=0; j<rworld.MAX_SIZE; ++j) {
-            ulonglong abG6Color = 0;
+            ulonglong abG7Color = 0;
             if (rworld.getRealMap()[i][j] == 0) {
                 auto abGColor = rworld.getMapColors()[i][j];
                 auto abG2Color = abGraph.unrank(abGColor).abstractionColor;
                 auto abG3Color = abGraph2.unrank(abG2Color).abstractionColor;
                 auto abG4Color = abGraph3.unrank(abG3Color).abstractionColor;
                 auto abG5Color = abGraph4.unrank(abG4Color).abstractionColor;
-                abG6Color = abGraph5.unrank(abG5Color).abstractionColor;
+                auto abG6Color = abGraph5.unrank(abG5Color).abstractionColor;
+                abG7Color = abGraph6.unrank(abG6Color).abstractionColor;
             }
-            if(!abG6Color) {
+            if(!abG7Color) {
                 cout<<".   ";
             } else {
-                cout<<abG6Color;
-                if (abG6Color < 10) {
+                cout << abG7Color;
+                if (abG7Color < 10) {
                     cout<<"   ";
-                } else if (abG6Color < 100) {
+                } else if (abG7Color < 100) {
                     cout<<"  ";
-                } else if (abG6Color >= 100) {
+                } else if (abG7Color >= 100) {
                     cout<<" ";
                 }
             }
