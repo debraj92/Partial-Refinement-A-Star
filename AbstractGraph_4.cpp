@@ -28,6 +28,8 @@ void AbstractGraph_4::createAbstractGraphNodes() {
          */
         for(auto connected1_itr = abNode.reachableNodes.begin(); connected1_itr != abNode.reachableNodes.end(); ++connected1_itr) {
             auto &abNode1 = abGraph3.unrank(*connected1_itr);
+            double edge1 = abGraph2.findShortestDistanceBetweenNodes(abNode1, abNode);
+            if (edge1 > MAX_EDGE_LENGTH) continue;
             if (abNode1.abstractionColor > 0) {
                 // already colored
                 /**
@@ -39,7 +41,6 @@ void AbstractGraph_4::createAbstractGraphNodes() {
                 two_clique[0] = abNode.color;
                 two_clique[1] = abNode1.color;
             }
-            double edge1 = abGraph3.findShortestDistanceBetweenNodes(abNode1, abNode);
             /**
              * Find another connected node abNode2 and see if its already colored. If No, then this is at least a three clique
              * with abNode and abNode1. We need to ensure we are not picking abNode1 again.
@@ -58,6 +59,7 @@ void AbstractGraph_4::createAbstractGraphNodes() {
                     continue;
                 }
                 double edge2 = abGraph3.findShortestDistanceBetweenNodes(abNode2, abNode);
+                if (edge2 > MAX_EDGE_LENGTH) continue;
                 if (abGraph3.findShortestDistanceBetweenNodes(abNode2, abNode1) < max(edge1, edge2)) {
                     /**
                      * 3 clique must have diagonal edge longer than side edges
@@ -94,6 +96,7 @@ void AbstractGraph_4::createAbstractGraphNodes() {
                     }
                     double edge3 = abGraph3.findShortestDistanceBetweenNodes(abNode1, abNode3);
                     double edge4 = abGraph3.findShortestDistanceBetweenNodes(abNode2, abNode3);
+                    if (edge3 > MAX_EDGE_LENGTH || edge4 > MAX_EDGE_LENGTH) continue;
                     if (abGraph3.findShortestDistanceBetweenNodes(abNode, abNode3) < max(edge3, edge4)) {
                         /**
                         * 4 clique must have diagonal edge longer than side edges

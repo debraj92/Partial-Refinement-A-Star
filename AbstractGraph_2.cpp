@@ -28,6 +28,8 @@ void AbstractGraph_2::createAbstractGraphNodes() {
          */
         for(auto connected1_itr = abNode.reachableNodes.begin(); connected1_itr != abNode.reachableNodes.end(); ++connected1_itr) {
             auto &abNode1 = abGraph.unrank(*connected1_itr);
+            double edge1 = abGraph.findShortestDistanceBetweenNodes(abNode1, abNode);
+            if (edge1 > MAX_EDGE_LENGTH) continue;
             if (abNode1.abstractionColor > 0) {
                 // already colored
                 /**
@@ -43,7 +45,6 @@ void AbstractGraph_2::createAbstractGraphNodes() {
              * Find another connected node abNode2 and see if its already colored. If No, then this is at least a three clique
              * with abNode and abNode1. We need to ensure we are not picking abNode1 again.
             */
-            double edge1 = abGraph.findShortestDistanceBetweenNodes(abNode1, abNode);
             bool skip = true;
             for(auto connected2_itr = abNode.reachableNodes.begin(); connected2_itr != abNode.reachableNodes.end(); ++connected2_itr) {
                 if(*connected2_itr == *connected1_itr) {
@@ -58,6 +59,7 @@ void AbstractGraph_2::createAbstractGraphNodes() {
                     continue;
                 }
                 double edge2 = abGraph.findShortestDistanceBetweenNodes(abNode2, abNode);
+                if (edge2 > MAX_EDGE_LENGTH) continue;
                 if (abGraph.findShortestDistanceBetweenNodes(abNode2, abNode1) < max(edge1, edge2)) {
                     /**
                      * 3 clique must have diagonal edge longer than side edges
@@ -95,6 +97,7 @@ void AbstractGraph_2::createAbstractGraphNodes() {
 
                     double edge3 = abGraph.findShortestDistanceBetweenNodes(abNode1, abNode3);
                     double edge4 = abGraph.findShortestDistanceBetweenNodes(abNode2, abNode3);
+                    if (edge3 > MAX_EDGE_LENGTH || edge4 > MAX_EDGE_LENGTH) continue;
                     if (abGraph.findShortestDistanceBetweenNodes(abNode, abNode3) < max(edge3, edge4)) {
                         /**
                         * 4 clique must have diagonal edge longer than side edges

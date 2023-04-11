@@ -22,6 +22,8 @@ using namespace std;
 
 class AbstractGraph_7 : public Abstraction {
 
+    const int MAX_EDGE_LENGTH = 64;
+
     unordered_map<ulonglong, AbstractNode> colorAbstractNodeMap;
 
     AbstractGraph_6 &abGraph6;
