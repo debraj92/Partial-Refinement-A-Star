@@ -20,7 +20,7 @@ using namespace std;
 
 class AbstractGraph_5 : public Abstraction {
 
-    unordered_map<int, AbstractNode> colorAbstractNodeMap;
+    unordered_map<ulonglong, AbstractNode> colorAbstractNodeMap;
 
     AbstractGraph_4 &abGraph4;
     AbstractGraph_3 &abGraph3;
@@ -28,17 +28,17 @@ class AbstractGraph_5 : public Abstraction {
     AbstractGraph &abGraph;
     RealWorld &rworld;
 
-    int goalColor;
+    ulonglong goalColor;
 
-    void dfsToConnectAbstractNodes(const AbstractNode &abNode, int abG5Color, unordered_set<int> &visited);
+    void dfsToConnectAbstractNodes(const AbstractNode &abNode, ulonglong abG5Color, unordered_set<ulonglong> &visited);
 
-    void createUndirectedEdge(int color1, int color2);
+    void createUndirectedEdge(ulonglong color1, ulonglong color2);
 
     void createAbstractGraphNodes();
 
     void createUndirectedEdges();
 
-    void printNode(int color);
+    void printNode(ulonglong color);
 
 public:
 
@@ -48,23 +48,23 @@ public:
 
     }
 
-    void setGoalColor(int color);
+    void setGoalColor(ulonglong color);
 
-    Node createNode(int color);
+    Node createNode(ulonglong color);
 
-    bool isGoalReached(int color);
+    bool isGoalReached(ulonglong color);
 
     AbstractNode& unrank(ulonglong rank);
 
-    int getGoalColor();
+    ulonglong getGoalColor();
 
     vector<AbstractNode> getAllAbstractNodes();
 
     void createAbstractGraph();
 
-    int getStartColor();
+    ulonglong getStartColor();
 
-    unordered_map<int, AbstractNode>& accessAbstractGraph();
+    unordered_map<ulonglong, AbstractNode>& accessAbstractGraph();
 
     void printConnectedColors();
 };

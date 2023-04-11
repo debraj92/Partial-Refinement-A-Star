@@ -10,6 +10,7 @@
 #include <utility>
 
 using namespace std;
+typedef unsigned long long ulonglong;
 
 class AbstractNode {
 
@@ -19,12 +20,12 @@ public:
      * Color of this node from child node's perspective.
      * It decides the color and paints the child nodes.
      */
-    int color;
+    ulonglong color;
     /**
      * Color of this node from parent node's perspective.
      * Parent node sets the color
      */
-    int abstractionColor = -1;
+    ulonglong abstractionColor = 0;
     pair<int, int> centroidRealNode;
 
     /**
@@ -37,14 +38,14 @@ public:
     AbstractNode(){
     }
 
-    AbstractNode(int color_, pair<int, int> centroidReal, pair<double, double> centerRepresentation, int totalNodes) :
+    AbstractNode(ulonglong color_, pair<int, int> centroidReal, pair<double, double> centerRepresentation, int totalNodes) :
     color(color_), centroidRealNode(std::move(centroidReal)), representationCenter(std::move(centerRepresentation)), totalNodesInRepresentation(totalNodes) {
     }
 
     // have a direct edge
-    unordered_set<int> reachableNodes{};
+    unordered_set<ulonglong> reachableNodes{};
 
-    void addChildAbstractNode(int childColor) {
+    void addChildAbstractNode(ulonglong childColor) {
         if (!reachableNodes.contains(childColor)) {
             // insert if not inserted already
             reachableNodes.insert(childColor);

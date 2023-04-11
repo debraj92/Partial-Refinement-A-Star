@@ -25,21 +25,21 @@ using namespace std;
 class AbstractGraph : public Abstraction {
 
     const int SECTOR_SIZE = 2;
-    unordered_map<int, AbstractNode> colorAbstractNodeMap;
+    unordered_map<ulonglong, AbstractNode> colorAbstractNodeMap;
 
     RealWorld &rworld;
 
-    int goalColor;
+    ulonglong goalColor;
 
-    void dfs(int x, int y, int sectorBoundaryX, int sectorBoundaryY,  int color);
+    void dfs(int x, int y, int sectorBoundaryX, int sectorBoundaryY,  ulonglong color);
 
-    int dfsInASector(int sectorStartX, int sectorStartY, int startColor);
+    ulonglong dfsInASector(int sectorStartX, int sectorStartY, ulonglong startColor);
 
-    void createUndirectedEdge(int color1, int color2);
+    void createUndirectedEdge(ulonglong color1, ulonglong color2);
 
     double findShortestDistanceToSectorCenter(int sectorBoundaryX, int sectorBoundaryY, int x, int y);
 
-    void dfsToConnectAbstractNodes(int x, int y, const int parentColor, vector<vector<bool>> &visited);
+    void dfsToConnectAbstractNodes(int x, int y, const ulonglong parentColor, vector<vector<bool>> &visited);
 
     void createAbstractGraphNodes();
 
@@ -61,23 +61,23 @@ public:
 
     void createAbstractGraph();
 
-    void printNode(int color);
+    void printNode(ulonglong color);
 
-    void setGoalColor(int color);
+    void setGoalColor(ulonglong color);
 
-    Node createNode(int color);
+    Node createNode(ulonglong color);
 
-    bool isGoalReached(int color);
+    bool isGoalReached(ulonglong color);
 
     AbstractNode& unrank(ulonglong rank);
 
-    int getGoalColor();
+    ulonglong getGoalColor();
 
     vector<AbstractNode> getAllAbstractNodes();
 
-    unordered_map<int, AbstractNode>& accessAbstractGraph();
+    unordered_map<ulonglong, AbstractNode>& accessAbstractGraph();
 
-    int getStartColor();
+    ulonglong getStartColor();
 
 };
 

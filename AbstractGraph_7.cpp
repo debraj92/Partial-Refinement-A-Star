@@ -1,11 +1,11 @@
 //
-// Created by Debraj Ray on 2023-04-06.
+// Created by Debraj Ray on 2023-04-10.
 //
 
-#include "AbstractGraph_5.h"
+#include "AbstractGraph_7.h"
 
-void AbstractGraph_5::createAbstractGraphNodes() {
-    auto &abGraph4Map = abGraph4.accessAbstractGraph();
+void AbstractGraph_7::createAbstractGraphNodes() {
+    auto &abGraph4Map = abGraph6.accessAbstractGraph();
     ulonglong color = 0;
     for(ulonglong abGColor = 1; abGColor <= abGraph4Map.size(); ++abGColor) {
         auto &abNode = abGraph4Map.find(abGColor)->second;
@@ -27,7 +27,7 @@ void AbstractGraph_5::createAbstractGraphNodes() {
          * Find a connected node and see if its already colored. If No, then this is at least a two clique with abNode
          */
         for(auto connected1_itr = abNode.reachableNodes.begin(); connected1_itr != abNode.reachableNodes.end(); ++connected1_itr) {
-            auto &abNode1 = abGraph4.unrank(*connected1_itr);
+            auto &abNode1 = abGraph6.unrank(*connected1_itr);
             if (abNode1.abstractionColor > 0) {
                 // already colored
                 /**
@@ -39,7 +39,7 @@ void AbstractGraph_5::createAbstractGraphNodes() {
                 two_clique[0] = abNode.color;
                 two_clique[1] = abNode1.color;
             }
-            double edge1 = abGraph4.findShortestDistanceBetweenNodes(abNode1, abNode);
+            double edge1 = abGraph6.findShortestDistanceBetweenNodes(abNode1, abNode);
             /**
              * Find another connected node abNode2 and see if its already colored. If No, then this is at least a three clique
              * with abNode and abNode1. We need to ensure we are not picking abNode1 again.
@@ -51,13 +51,13 @@ void AbstractGraph_5::createAbstractGraphNodes() {
                     continue;
                 }
                 if (skip) continue;
-                auto &abNode2 = abGraph4.unrank(*connected2_itr);
+                auto &abNode2 = abGraph6.unrank(*connected2_itr);
                 if (abNode2.abstractionColor > 0 || !abNode2.reachableNodes.contains(*connected1_itr)) {
                     // already colored
                     continue;
                 }
-                double edge2 = abGraph4.findShortestDistanceBetweenNodes(abNode2, abNode);
-                if (abGraph4.findShortestDistanceBetweenNodes(abNode2, abNode1) < max(edge1, edge2)) {
+                double edge2 = abGraph6.findShortestDistanceBetweenNodes(abNode2, abNode);
+                if (abGraph6.findShortestDistanceBetweenNodes(abNode2, abNode1) < max(edge1, edge2)) {
                     /**
                      * 3 clique must have diagonal edge longer than side edges
                      */
@@ -80,7 +80,7 @@ void AbstractGraph_5::createAbstractGraphNodes() {
                     if (*connected3_itr == abNode.color || *connected3_itr == abNode1.color) {
                         continue;
                     }
-                    auto &abNode3 = abGraph4.unrank(*connected3_itr);
+                    auto &abNode3 = abGraph6.unrank(*connected3_itr);
                     if (abNode3.abstractionColor > 0) {
                         // already colored
                         continue;
@@ -91,9 +91,9 @@ void AbstractGraph_5::createAbstractGraphNodes() {
                     if (!abNode1.reachableNodes.contains(abNode3.color) || !abNode.reachableNodes.contains(abNode3.color)) {
                         continue;
                     }
-                    double edge3 = abGraph4.findShortestDistanceBetweenNodes(abNode1, abNode3);
-                    double edge4 = abGraph4.findShortestDistanceBetweenNodes(abNode2, abNode3);
-                    if (abGraph4.findShortestDistanceBetweenNodes(abNode, abNode3) < max(edge3, edge4)) {
+                    double edge3 = abGraph6.findShortestDistanceBetweenNodes(abNode1, abNode3);
+                    double edge4 = abGraph6.findShortestDistanceBetweenNodes(abNode2, abNode3);
+                    if (abGraph6.findShortestDistanceBetweenNodes(abNode, abNode3) < max(edge3, edge4)) {
                         /**
                         * 4 clique must have diagonal edge longer than side edges
                         */
@@ -139,9 +139,9 @@ void AbstractGraph_5::createAbstractGraphNodes() {
             int totalNodes = 0;
 
             if (found3Clique) {
-                auto &node1 = abGraph4.unrank(three_clique[0]);
-                auto &node2 = abGraph4.unrank(three_clique[1]);
-                auto &node3 = abGraph4.unrank(three_clique[2]);
+                auto &node1 = abGraph6.unrank(three_clique[0]);
+                auto &node2 = abGraph6.unrank(three_clique[1]);
+                auto &node3 = abGraph6.unrank(three_clique[2]);
 
                 node1.abstractionColor = color;
                 xSum += node1.getXTotalInRepresentation();
@@ -159,8 +159,8 @@ void AbstractGraph_5::createAbstractGraphNodes() {
                 totalNodes += node3.totalNodesInRepresentation;
 
             } else if (found2Clique) {
-                auto &node1 = abGraph4.unrank(two_clique[0]);
-                auto &node2 = abGraph4.unrank(two_clique[1]);
+                auto &node1 = abGraph6.unrank(two_clique[0]);
+                auto &node2 = abGraph6.unrank(two_clique[1]);
 
                 node1.abstractionColor = color;
                 xSum += node1.getXTotalInRepresentation();
@@ -189,8 +189,8 @@ void AbstractGraph_5::createAbstractGraphNodes() {
     }
 }
 
-void AbstractGraph_5::dfsToConnectAbstractNodes(const AbstractNode &abNode, ulonglong abG5Color, unordered_set<ulonglong> &visited) {
-    if (!colorAbstractNodeMap.contains(abG5Color)) {
+void AbstractGraph_7::dfsToConnectAbstractNodes(const AbstractNode &abNode, ulonglong abG7Color, unordered_set<ulonglong> &visited) {
+    if (!colorAbstractNodeMap.contains(abG7Color)) {
         return;
     }
 
@@ -200,61 +200,63 @@ void AbstractGraph_5::dfsToConnectAbstractNodes(const AbstractNode &abNode, ulon
     visited.insert(abNode.color);
 
     for(const auto& connectedChildNodeColor : abNode.reachableNodes) {
-        auto &connectedChildNode = abGraph4.unrank(connectedChildNodeColor);
+        auto &connectedChildNode = abGraph6.unrank(connectedChildNodeColor);
         assert(connectedChildNode.abstractionColor > 0);
-        if (connectedChildNode.abstractionColor == abG5Color) {
-            dfsToConnectAbstractNodes(connectedChildNode, abG5Color, visited);
+        if (connectedChildNode.abstractionColor == abG7Color) {
+            dfsToConnectAbstractNodes(connectedChildNode, abG7Color, visited);
         } else {
-            createUndirectedEdge(abG5Color, connectedChildNode.abstractionColor);
+            createUndirectedEdge(abG7Color, connectedChildNode.abstractionColor);
         }
     }
 }
 
-void AbstractGraph_5::createUndirectedEdges() {
-    ulonglong abG5Color = 1;
+void AbstractGraph_7::createUndirectedEdges() {
+    ulonglong abG7Color = 1;
     unordered_set<ulonglong> visited;
-    while (colorAbstractNodeMap.contains(abG5Color)) {
-        const auto &centroid = colorAbstractNodeMap[abG5Color].centroidRealNode;
+    while (colorAbstractNodeMap.contains(abG7Color)) {
+        const auto &centroid = colorAbstractNodeMap[abG7Color].centroidRealNode;
         auto abGColor = rworld.getMapColors()[centroid.first][centroid.second];
         auto abG2Color = abGraph.unrank(abGColor).abstractionColor;
         auto abG3Color = abGraph2.unrank(abG2Color).abstractionColor;
         auto abG4Color = abGraph3.unrank(abG3Color).abstractionColor;
-        if (!visited.contains(abG4Color)) {
-            const auto &abG4Node = abGraph4.unrank(abG4Color);
-            dfsToConnectAbstractNodes(abG4Node, abG5Color, visited);
+        auto abG5Color = abGraph4.unrank(abG4Color).abstractionColor;
+        auto abG6Color = abGraph5.unrank(abG5Color).abstractionColor;
+        if (!visited.contains(abG6Color)) {
+            const auto &abG6Node = abGraph6.unrank(abG6Color);
+            dfsToConnectAbstractNodes(abG6Node, abG7Color, visited);
         }
-        //printNode(abG5Color);
-        ++abG5Color;
+        //printNode(abG6Color);
+        ++abG7Color;
     }
 }
 
-void AbstractGraph_5::createUndirectedEdge(ulonglong color1, ulonglong color2) {
+void AbstractGraph_7::createUndirectedEdge(ulonglong color1, ulonglong color2) {
     colorAbstractNodeMap.find(color1)->second.addChildAbstractNode(color2);
     colorAbstractNodeMap.find(color2)->second.addChildAbstractNode(color1);
 }
 
-void AbstractGraph_5::setGoalColor(ulonglong color) {
+void AbstractGraph_7::setGoalColor(ulonglong color) {
     goalColor = color;
 }
 
-Node AbstractGraph_5::createNode(ulonglong color) {
+Node AbstractGraph_7::createNode(ulonglong color) {
     return {(ulonglong) color};
 }
 
-bool AbstractGraph_5::isGoalReached(ulonglong color) {
+bool AbstractGraph_7::isGoalReached(ulonglong color) {
     return goalColor == color;
 }
 
-AbstractNode &AbstractGraph_5::unrank(ulonglong rank) {
+AbstractNode &AbstractGraph_7::unrank(ulonglong rank) {
     assert(colorAbstractNodeMap.find(rank) != colorAbstractNodeMap.end());
     return colorAbstractNodeMap.find(rank)->second;
 }
 
-ulonglong AbstractGraph_5::getGoalColor() {
+ulonglong AbstractGraph_7::getGoalColor() {
     return goalColor;
 }
 
-vector<AbstractNode> AbstractGraph_5::getAllAbstractNodes() {
+vector<AbstractNode> AbstractGraph_7::getAllAbstractNodes() {
     vector<AbstractNode> allNodes;
     for (auto& [color, abNode]: colorAbstractNodeMap) {
         allNodes.emplace_back(abNode);
@@ -262,12 +264,12 @@ vector<AbstractNode> AbstractGraph_5::getAllAbstractNodes() {
     return move(allNodes);
 }
 
-void AbstractGraph_5::createAbstractGraph() {
+void AbstractGraph_7::createAbstractGraph() {
     createAbstractGraphNodes();
     createUndirectedEdges();
 }
 
-void AbstractGraph_5::printNode(ulonglong color) {
+void AbstractGraph_7::printNode(int color) {
     const auto &color_AbsNode = colorAbstractNodeMap.find(color);
     cout<<"Color: "<<color_AbsNode->first<<", Connected Colors: ";
     for(const auto& childColor: color_AbsNode->second.reachableNodes) {
@@ -276,40 +278,43 @@ void AbstractGraph_5::printNode(ulonglong color) {
     cout<<endl;
 }
 
-ulonglong AbstractGraph_5::getStartColor() {
+ulonglong AbstractGraph_7::getStartColor() {
     int startX, startY;
     rworld.getStart(startX, startY);
     ulonglong startColor_abstraction1 = rworld.getMapColors()[startX][startY];
     ulonglong startColor_abstraction2 = abGraph.unrank(startColor_abstraction1).abstractionColor;
     ulonglong startColor_abstraction3 = abGraph2.unrank(startColor_abstraction2).abstractionColor;
     ulonglong startColor_abstraction4 = abGraph3.unrank(startColor_abstraction3).abstractionColor;
-    return abGraph4.unrank(startColor_abstraction4).abstractionColor;
+    ulonglong startColor_abstraction5 = abGraph4.unrank(startColor_abstraction4).abstractionColor;
+    ulonglong startColor_abstraction6 = abGraph5.unrank(startColor_abstraction5).abstractionColor;
+    return abGraph6.unrank(startColor_abstraction6).abstractionColor;
 }
 
-unordered_map<ulonglong, AbstractNode> &AbstractGraph_5::accessAbstractGraph() {
+unordered_map<ulonglong, AbstractNode> &AbstractGraph_7::accessAbstractGraph() {
     return colorAbstractNodeMap;
 }
 
-void AbstractGraph_5::printConnectedColors() {
+void AbstractGraph_7::printConnectedColors() {
     for(int i=0; i<rworld.MAX_SIZE; ++i) {
         for(int j=0; j<rworld.MAX_SIZE; ++j) {
-            ulonglong abG5Color = 0;
+            ulonglong abG6Color = 0;
             if (rworld.getRealMap()[i][j] == 0) {
                 auto abGColor = rworld.getMapColors()[i][j];
                 auto abG2Color = abGraph.unrank(abGColor).abstractionColor;
                 auto abG3Color = abGraph2.unrank(abG2Color).abstractionColor;
                 auto abG4Color = abGraph3.unrank(abG3Color).abstractionColor;
-                abG5Color = abGraph4.unrank(abG4Color).abstractionColor;
+                auto abG5Color = abGraph4.unrank(abG4Color).abstractionColor;
+                abG6Color = abGraph5.unrank(abG5Color).abstractionColor;
             }
-            if(!abG5Color) {
+            if(!abG6Color) {
                 cout<<".   ";
             } else {
-                cout<<abG5Color;
-                if (abG5Color < 10) {
+                cout<<abG6Color;
+                if (abG6Color < 10) {
                     cout<<"   ";
-                } else if (abG5Color < 100) {
+                } else if (abG6Color < 100) {
                     cout<<"  ";
-                } else if (abG5Color >= 100) {
+                } else if (abG6Color >= 100) {
                     cout<<" ";
                 }
             }

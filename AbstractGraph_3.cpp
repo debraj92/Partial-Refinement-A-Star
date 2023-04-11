@@ -7,8 +7,8 @@
 
 void AbstractGraph_3::createAbstractGraphNodes() {
     auto &abGraph2Map = abGraph2.accessAbstractGraph();
-    int color = 0;
-    for(int abGColor = 1; abGColor <= abGraph2Map.size(); ++abGColor) {
+    ulonglong color = 0;
+    for(ulonglong abGColor = 1; abGColor <= abGraph2Map.size(); ++abGColor) {
         auto &abNode = abGraph2Map.find(abGColor)->second;
         if (abNode.abstractionColor > 0) {
             continue;
@@ -190,7 +190,7 @@ void AbstractGraph_3::createAbstractGraphNodes() {
     //cout<<"Total Colors in ABG3 "<<color<<endl;
 }
 
-void AbstractGraph_3::dfsToConnectAbstractNodes(const AbstractNode &abNode, int abG3Color, unordered_set<int> &visited) {
+void AbstractGraph_3::dfsToConnectAbstractNodes(const AbstractNode &abNode, ulonglong abG3Color, unordered_set<ulonglong> &visited) {
     if (!colorAbstractNodeMap.contains(abG3Color)) {
         return;
     }
@@ -212,8 +212,8 @@ void AbstractGraph_3::dfsToConnectAbstractNodes(const AbstractNode &abNode, int 
 }
 
 void AbstractGraph_3::createUndirectedEdges() {
-    int abG3Color = 1;
-    unordered_set<int> visited;
+    ulonglong abG3Color = 1;
+    unordered_set<ulonglong> visited;
     while (colorAbstractNodeMap.contains(abG3Color)) {
         const auto &centroid = colorAbstractNodeMap[abG3Color].centroidRealNode;
         auto abGColor = rworld.getMapColors()[centroid.first][centroid.second];
@@ -227,29 +227,29 @@ void AbstractGraph_3::createUndirectedEdges() {
     }
 }
 
-void AbstractGraph_3::createUndirectedEdge(int color1, int color2) {
+void AbstractGraph_3::createUndirectedEdge(ulonglong color1, ulonglong color2) {
     colorAbstractNodeMap.find(color1)->second.addChildAbstractNode(color2);
     colorAbstractNodeMap.find(color2)->second.addChildAbstractNode(color1);
 }
 
-void AbstractGraph_3::setGoalColor(int color) {
+void AbstractGraph_3::setGoalColor(ulonglong color) {
     goalColor = color;
 }
 
-Node AbstractGraph_3::createNode(int color) {
+Node AbstractGraph_3::createNode(ulonglong color) {
     return {(ulonglong) color};
 }
 
-bool AbstractGraph_3::isGoalReached(int color) {
+bool AbstractGraph_3::isGoalReached(ulonglong color) {
     return goalColor == color;
 }
 
 AbstractNode &AbstractGraph_3::unrank(ulonglong rank) {
-    assert(colorAbstractNodeMap.find((int)rank) != colorAbstractNodeMap.end());
-    return colorAbstractNodeMap.find((int)rank)->second;
+    assert(colorAbstractNodeMap.find(rank) != colorAbstractNodeMap.end());
+    return colorAbstractNodeMap.find(rank)->second;
 }
 
-int AbstractGraph_3::getGoalColor() {
+ulonglong AbstractGraph_3::getGoalColor() {
     return goalColor;
 }
 
@@ -266,7 +266,7 @@ void AbstractGraph_3::createAbstractGraph() {
     createUndirectedEdges();
 }
 
-void AbstractGraph_3::printNode(int color) {
+void AbstractGraph_3::printNode(ulonglong color) {
     const auto &color_AbsNode = colorAbstractNodeMap.find(color);
     cout<<"Color: "<<color_AbsNode->first<<", Connected Colors: ";
     for(const auto& childColor: color_AbsNode->second.reachableNodes) {
@@ -275,22 +275,22 @@ void AbstractGraph_3::printNode(int color) {
     cout<<endl;
 }
 
-int AbstractGraph_3::getStartColor() {
+ulonglong AbstractGraph_3::getStartColor() {
     int startX, startY;
     rworld.getStart(startX, startY);
-    int startColor_abstraction1 = rworld.getMapColors()[startX][startY];
-    int startColor_abstraction2 = abGraph.unrank(startColor_abstraction1).abstractionColor;
+    ulonglong startColor_abstraction1 = rworld.getMapColors()[startX][startY];
+    ulonglong startColor_abstraction2 = abGraph.unrank(startColor_abstraction1).abstractionColor;
     return abGraph2.unrank(startColor_abstraction2).abstractionColor;
 }
 
-unordered_map<int, AbstractNode> &AbstractGraph_3::accessAbstractGraph() {
+unordered_map<ulonglong, AbstractNode> &AbstractGraph_3::accessAbstractGraph() {
     return colorAbstractNodeMap;
 }
 
 void AbstractGraph_3::printConnectedColors() {
     for(int i=0; i<rworld.MAX_SIZE; ++i) {
         for(int j=0; j<rworld.MAX_SIZE; ++j) {
-            int abG3Color = 0;
+            ulonglong abG3Color = 0;
             if (rworld.getRealMap()[i][j] == 0) {
                 auto abGColor = rworld.getMapColors()[i][j];
                 auto abG2Color = abGraph.unrank(abGColor).abstractionColor;

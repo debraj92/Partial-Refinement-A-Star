@@ -5,7 +5,7 @@
 #include "AbstractGraph.h"
 
 void AbstractGraph::createAbstractGraphNodes() {
-    int color = 1;
+    ulonglong color = 1;
     int totalSectors = rworld.MAX_SIZE / SECTOR_SIZE;
     for(int sectorStartX = 0; sectorStartX < totalSectors; ++sectorStartX) {
         for(int sectorStartY = 0; sectorStartY < totalSectors; ++sectorStartY) {
@@ -17,7 +17,7 @@ void AbstractGraph::createAbstractGraphNodes() {
     }
 }
 
-void AbstractGraph::dfs(int x, int y, int sectorBoundaryX, int sectorBoundaryY, int color) {
+void AbstractGraph::dfs(int x, int y, int sectorBoundaryX, int sectorBoundaryY, ulonglong color) {
     /**
      * Check x, y lies within sector
      */
@@ -79,7 +79,7 @@ void AbstractGraph::dfs(int x, int y, int sectorBoundaryX, int sectorBoundaryY, 
     }
 }
 
-int AbstractGraph::dfsInASector(int sectorStartX, int sectorStartY, int startColor) {
+ulonglong AbstractGraph::dfsInASector(int sectorStartX, int sectorStartY, ulonglong startColor) {
     for(int x = sectorStartX; x < sectorStartX + SECTOR_SIZE; ++x) {
         for(int y = sectorStartY; y < sectorStartY + SECTOR_SIZE; ++y) {
             if (rworld.getMapColors()[x][y] == -1 && rworld.getRealMap()[x][y] == 0) {
@@ -104,7 +104,7 @@ int AbstractGraph::dfsInASector(int sectorStartX, int sectorStartY, int startCol
     return startColor;
 }
 
-void AbstractGraph::createUndirectedEdge(int color1, int color2) {
+void AbstractGraph::createUndirectedEdge(ulonglong color1, ulonglong color2) {
     colorAbstractNodeMap.find(color1)->second.addChildAbstractNode(color2);
     colorAbstractNodeMap.find(color2)->second.addChildAbstractNode(color1);
 }
@@ -127,7 +127,7 @@ void AbstractGraph::connectAbstractNodesWithUndirectedEdges() {
     }
 }
 
-void AbstractGraph::dfsToConnectAbstractNodes(int x, int y, const int parentColor, vector<vector<bool>> &visited) {
+void AbstractGraph::dfsToConnectAbstractNodes(int x, int y, const ulonglong parentColor, vector<vector<bool>> &visited) {
     if (x >= rworld.MAX_SIZE || y >= rworld.MAX_SIZE) {
         return;
     }
@@ -211,7 +211,7 @@ void AbstractGraph::createAbstractGraph() {
     connectAbstractNodesWithUndirectedEdges();
 }
 
-void AbstractGraph::printNode(int color) {
+void AbstractGraph::printNode(ulonglong color) {
 
     const auto &color_AbsNode = colorAbstractNodeMap.find(color);
     cout<<"Color: "<<color_AbsNode->first<<", Connected Colors: ";
@@ -221,25 +221,25 @@ void AbstractGraph::printNode(int color) {
     cout<<endl;
 }
 
-void AbstractGraph::setGoalColor(int color) {
+void AbstractGraph::setGoalColor(ulonglong color) {
     goalColor = color;
 }
 
-Node AbstractGraph::createNode(int color) {
+Node AbstractGraph::createNode(ulonglong color) {
     return {(ulonglong) color};
 }
 
-bool AbstractGraph::isGoalReached(int color) {
+bool AbstractGraph::isGoalReached(ulonglong color) {
     return goalColor == color;
 }
 
 AbstractNode& AbstractGraph::unrank(ulonglong rank) {
 
-    assert(colorAbstractNodeMap.find((int)rank) != colorAbstractNodeMap.end());
-    return colorAbstractNodeMap.find((int)rank)->second;
+    assert(colorAbstractNodeMap.find(rank) != colorAbstractNodeMap.end());
+    return colorAbstractNodeMap.find(rank)->second;
 }
 
-int AbstractGraph::getGoalColor() {
+ulonglong AbstractGraph::getGoalColor() {
     return goalColor;
 }
 
@@ -266,14 +266,14 @@ vector<AbstractNode> AbstractGraph::getAllAbstractNodes() {
 /**
  * Real World must contain the actual start (x,y)
  */
-int AbstractGraph::getStartColor() {
+ulonglong AbstractGraph::getStartColor() {
     int startX, startY;
     rworld.getStart(startX, startY);
-    int startColor = rworld.getMapColors()[startX][startY];
+    ulonglong startColor = rworld.getMapColors()[startX][startY];
     return startColor;
 }
 
-unordered_map<int, AbstractNode>& AbstractGraph::accessAbstractGraph() {
+unordered_map<ulonglong, AbstractNode>& AbstractGraph::accessAbstractGraph() {
     return colorAbstractNodeMap;
 }
 

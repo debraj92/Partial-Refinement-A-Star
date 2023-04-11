@@ -83,7 +83,7 @@ void RealWorld::printProvidedRealMap(vector<vector<int>> &givenMap) {
     }
 }
 
-vector<vector<int>> &RealWorld::getMapColors() {
+vector<vector<ulonglong>> &RealWorld::getMapColors() {
     return mapColors;
 }
 

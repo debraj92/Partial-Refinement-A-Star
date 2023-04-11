@@ -10,6 +10,8 @@
 #include "AbstractGraph_3.h"
 #include "AbstractGraph_4.h"
 #include "AbstractGraph_5.h"
+#include "AbstractGraph_6.h"
+#include "AbstractGraph_7.h"
 #include "RealWorld.h"
 #include "AStarOpenList.h"
 #include "DataPoint.h"
@@ -20,6 +22,8 @@ class AStarSearch {
     /**
      * 4 layers of abstraction constructed over the real world
      */
+    unique_ptr<AbstractGraph_7> abstractGraph7;
+    unique_ptr<AbstractGraph_6> abstractGraph6;
     unique_ptr<AbstractGraph_5> abstractGraph5;
     unique_ptr<AbstractGraph_4> abstractGraph4;
     unique_ptr<AbstractGraph_3> abstractGraph3;
@@ -54,7 +58,8 @@ public:
      */
     bool searchPathInRealWorldWithAstar(unique_ptr<unordered_map<ulonglong, ulonglong>> &childParent,
                                         unique_ptr<unordered_set<ulonglong>> &abstractParentNodes,
-                                        DataPoint &dataPoint);
+                                        DataPoint &dataPoint,
+                                        ulonglong parentGoalColor);
 
     /**
      * Search a path through an abstraction level. It uses constrained A* search that expands nodes whose parent node
@@ -65,11 +70,11 @@ public:
                                             unique_ptr<unordered_set<ulonglong>> &abstractParentNodes,
                                             int abstractionLevel,
                                             ulonglong parentGoalColor,
-                                            int &startColor);
+                                            ulonglong &startColor);
 
     bool searchAndTruncatePathInAbstractWorld (int K, unique_ptr<unordered_set<ulonglong>> &abstractParentNodes, ulonglong &parentGoalColor);
 
-    int getGoalColorOfAbstraction(int abstractionLevel);
+    ulonglong getGoalColorOfAbstraction(int abstractionLevel);
 
     bool partialRefinementAStarSearch(int K, DataPoint &dataPoint);
 

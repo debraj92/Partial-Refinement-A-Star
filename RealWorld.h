@@ -17,7 +17,7 @@ class RealWorld {
 
 
     vector<vector<int>> realMap;
-    vector<vector<int>> mapColors;
+    vector<vector<ulonglong>> mapColors;
 
     int goalX, goalY;
     int finalDestinationX, finalDestinationY;
@@ -35,7 +35,7 @@ public:
 
     void printColors();
 
-    vector<vector<int>>& getMapColors();
+    vector<vector<ulonglong>>& getMapColors();
     vector<vector<int>>& getRealMap();
 
     ulonglong getRank(int x, int y);

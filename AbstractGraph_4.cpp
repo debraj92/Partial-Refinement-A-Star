@@ -6,8 +6,8 @@
 
 void AbstractGraph_4::createAbstractGraphNodes() {
     auto &abGraph3Map = abGraph3.accessAbstractGraph();
-    int color = 0;
-    for(int abGColor = 1; abGColor <= abGraph3Map.size(); ++abGColor) {
+    ulonglong color = 0;
+    for(ulonglong abGColor = 1; abGColor <= abGraph3Map.size(); ++abGColor) {
         auto &abNode = abGraph3Map.find(abGColor)->second;
         if (abNode.abstractionColor > 0) {
             continue;
@@ -190,7 +190,7 @@ void AbstractGraph_4::createAbstractGraphNodes() {
     }
 }
 
-void AbstractGraph_4::dfsToConnectAbstractNodes(const AbstractNode &abNode, int abG4Color, unordered_set<int> &visited) {
+void AbstractGraph_4::dfsToConnectAbstractNodes(const AbstractNode &abNode, ulonglong abG4Color, unordered_set<ulonglong> &visited) {
     if (!colorAbstractNodeMap.contains(abG4Color)) {
         return;
     }
@@ -212,8 +212,8 @@ void AbstractGraph_4::dfsToConnectAbstractNodes(const AbstractNode &abNode, int 
 }
 
 void AbstractGraph_4::createUndirectedEdges() {
-    int abG4Color = 1;
-    unordered_set<int> visited;
+    ulonglong abG4Color = 1;
+    unordered_set<ulonglong> visited;
     while (colorAbstractNodeMap.contains(abG4Color)) {
         const auto &centroid = colorAbstractNodeMap[abG4Color].centroidRealNode;
         auto abGColor = rworld.getMapColors()[centroid.first][centroid.second];
@@ -227,29 +227,29 @@ void AbstractGraph_4::createUndirectedEdges() {
     }
 }
 
-void AbstractGraph_4::createUndirectedEdge(int color1, int color2) {
+void AbstractGraph_4::createUndirectedEdge(ulonglong color1, ulonglong color2) {
     colorAbstractNodeMap.find(color1)->second.addChildAbstractNode(color2);
     colorAbstractNodeMap.find(color2)->second.addChildAbstractNode(color1);
 }
 
-void AbstractGraph_4::setGoalColor(int color) {
+void AbstractGraph_4::setGoalColor(ulonglong color) {
     goalColor = color;
 }
 
-Node AbstractGraph_4::createNode(int color) {
+Node AbstractGraph_4::createNode(ulonglong color) {
     return {(ulonglong) color};
 }
 
-bool AbstractGraph_4::isGoalReached(int color) {
+bool AbstractGraph_4::isGoalReached(ulonglong color) {
     return goalColor == color;
 }
 
 AbstractNode &AbstractGraph_4::unrank(ulonglong rank) {
-    assert(colorAbstractNodeMap.find((int)rank) != colorAbstractNodeMap.end());
-    return colorAbstractNodeMap.find((int)rank)->second;
+    assert(colorAbstractNodeMap.find(rank) != colorAbstractNodeMap.end());
+    return colorAbstractNodeMap.find(rank)->second;
 }
 
-int AbstractGraph_4::getGoalColor() {
+ulonglong AbstractGraph_4::getGoalColor() {
     return goalColor;
 }
 
@@ -266,7 +266,7 @@ void AbstractGraph_4::createAbstractGraph() {
     createUndirectedEdges();
 }
 
-void AbstractGraph_4::printNode(int color) {
+void AbstractGraph_4::printNode(ulonglong color) {
     const auto &color_AbsNode = colorAbstractNodeMap.find(color);
     cout<<"Color: "<<color_AbsNode->first<<", Connected Colors: ";
     for(const auto& childColor: color_AbsNode->second.reachableNodes) {
@@ -275,15 +275,15 @@ void AbstractGraph_4::printNode(int color) {
     cout<<endl;
 }
 
-int AbstractGraph_4::getStartColor() {
+ulonglong AbstractGraph_4::getStartColor() {
     int startX, startY;
     rworld.getStart(startX, startY);
-    int startColor_abstraction1 = rworld.getMapColors()[startX][startY];
-    int startColor_abstraction2 = abGraph.unrank(startColor_abstraction1).abstractionColor;
-    int startColor_abstraction3 = abGraph2.unrank(startColor_abstraction2).abstractionColor;
+    ulonglong startColor_abstraction1 = rworld.getMapColors()[startX][startY];
+    ulonglong startColor_abstraction2 = abGraph.unrank(startColor_abstraction1).abstractionColor;
+    ulonglong    startColor_abstraction3 = abGraph2.unrank(startColor_abstraction2).abstractionColor;
     return abGraph3.unrank(startColor_abstraction3).abstractionColor;
 }
 
-unordered_map<int, AbstractNode> &AbstractGraph_4::accessAbstractGraph() {
+unordered_map<ulonglong, AbstractNode> &AbstractGraph_4::accessAbstractGraph() {
     return colorAbstractNodeMap;
 }

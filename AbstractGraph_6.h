@@ -1,9 +1,9 @@
 //
-// Created by Debraj Ray on 2023-04-06.
+// Created by Debraj Ray on 2023-04-10.
 //
 
-#ifndef INC_658PROJECT_ABSTRACTGRAPH_4_H
-#define INC_658PROJECT_ABSTRACTGRAPH_4_H
+#ifndef INC_658PROJECT_ABSTRACTGRAPH_6_H
+#define INC_658PROJECT_ABSTRACTGRAPH_6_H
 
 #include <vector>
 #include <iostream>
@@ -12,15 +12,19 @@
 #include "AbstractNode.h"
 #include "AbstractGraph_2.h"
 #include "AbstractGraph_3.h"
+#include "AbstractGraph_4.h"
+#include "AbstractGraph_5.h"
 #include "AbstractGraph.h"
 #include "Abstraction.h"
 
 using namespace std;
 
-class AbstractGraph_4 : public Abstraction {
+class AbstractGraph_6 : public Abstraction {
 
     unordered_map<ulonglong, AbstractNode> colorAbstractNodeMap;
 
+    AbstractGraph_5 &abGraph5;
+    AbstractGraph_4 &abGraph4;
     AbstractGraph_3 &abGraph3;
     AbstractGraph_2 &abGraph2;
     AbstractGraph &abGraph;
@@ -28,20 +32,21 @@ class AbstractGraph_4 : public Abstraction {
 
     ulonglong goalColor;
 
-    void dfsToConnectAbstractNodes(const AbstractNode &abNode, ulonglong abG4Color, unordered_set<ulonglong> &visited);
+    void dfsToConnectAbstractNodes(const AbstractNode &abNode, ulonglong abG6Color, unordered_set<ulonglong> &visited);
 
     void createUndirectedEdge(ulonglong color1, ulonglong color2);
 
     void createAbstractGraphNodes();
+
     void createUndirectedEdges();
 
     void printNode(ulonglong color);
 
 public:
 
-    AbstractGraph_4(RealWorld &realWorld, AbstractGraph &abG1, AbstractGraph_2 &abG2, AbstractGraph_3 &abG3) :
-    rworld(realWorld), abGraph(abG1), abGraph2(abG2), abGraph3(abG3) {
-
+    AbstractGraph_6(RealWorld &realWorld,
+    AbstractGraph &abG1, AbstractGraph_2 &abG2, AbstractGraph_3 &abG3, AbstractGraph_4 &abG4, AbstractGraph_5 &abG5) :
+    rworld(realWorld), abGraph(abG1), abGraph2(abG2), abGraph3(abG3), abGraph4(abG4), abGraph5(abG5) {
     }
 
     void setGoalColor(ulonglong color);
@@ -61,7 +66,9 @@ public:
     ulonglong getStartColor();
 
     unordered_map<ulonglong, AbstractNode>& accessAbstractGraph();
+
+    void printConnectedColors();
 };
 
 
-#endif //INC_658PROJECT_ABSTRACTGRAPH_4_H
+#endif //INC_658PROJECT_ABSTRACTGRAPH_6_H
