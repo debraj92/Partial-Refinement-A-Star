@@ -24,7 +24,7 @@ class AbstractGraph_3 : public Abstraction {
 
     unordered_map<ulonglong, AbstractNode> colorAbstractNodeMap;
 
-    const int MAX_EDGE_LENGTH = 4;
+    const int MAX_EDGE_LENGTH = 3;
 
     AbstractGraph_2 &abGraph2;
     AbstractGraph &abGraph;
