@@ -28,8 +28,11 @@ void AbstractGraph_7::createAbstractGraphNodes() {
          */
         for(auto connected1_itr = abNode.reachableNodes.begin(); connected1_itr != abNode.reachableNodes.end(); ++connected1_itr) {
             auto &abNode1 = abGraph6.unrank(*connected1_itr);
+            if (abNode.totalNodesInRepresentation + abNode1.totalNodesInRepresentation > MAX_NODES) continue;
+
             double edge1 = abGraph6.findShortestDistanceBetweenNodes(abNode1, abNode);
             if (edge1 > MAX_EDGE_LENGTH) continue;
+
             if (abNode1.abstractionColor > 0) {
                 // already colored
                 /**
@@ -57,8 +60,12 @@ void AbstractGraph_7::createAbstractGraphNodes() {
                     // already colored
                     continue;
                 }
+                if (abNode.totalNodesInRepresentation + abNode1.totalNodesInRepresentation
+                    + abNode2.totalNodesInRepresentation > MAX_NODES) continue;
+
                 double edge2 = abGraph6.findShortestDistanceBetweenNodes(abNode2, abNode);
                 if (edge2 > MAX_EDGE_LENGTH) continue;
+
                 if (abGraph6.findShortestDistanceBetweenNodes(abNode2, abNode1) < max(edge1, edge2)) {
                     /**
                      * 3 clique must have diagonal edge longer than side edges
@@ -93,6 +100,9 @@ void AbstractGraph_7::createAbstractGraphNodes() {
                     if (!abNode1.reachableNodes.contains(abNode3.color) || !abNode.reachableNodes.contains(abNode3.color)) {
                         continue;
                     }
+                    if (abNode.totalNodesInRepresentation + abNode1.totalNodesInRepresentation
+                        + abNode2.totalNodesInRepresentation + abNode3.totalNodesInRepresentation > MAX_NODES) continue;
+
                     double edge3 = abGraph6.findShortestDistanceBetweenNodes(abNode1, abNode3);
                     double edge4 = abGraph6.findShortestDistanceBetweenNodes(abNode2, abNode3);
                     if (edge3 > MAX_EDGE_LENGTH || edge4 > MAX_EDGE_LENGTH) continue;

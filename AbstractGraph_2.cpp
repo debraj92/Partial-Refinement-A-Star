@@ -28,8 +28,11 @@ void AbstractGraph_2::createAbstractGraphNodes() {
          */
         for(auto connected1_itr = abNode.reachableNodes.begin(); connected1_itr != abNode.reachableNodes.end(); ++connected1_itr) {
             auto &abNode1 = abGraph.unrank(*connected1_itr);
+            if (abNode.totalNodesInRepresentation + abNode1.totalNodesInRepresentation > MAX_NODES) continue;
+
             double edge1 = abGraph.findShortestDistanceBetweenNodes(abNode1, abNode);
             if (edge1 > MAX_EDGE_LENGTH) continue;
+
             if (abNode1.abstractionColor > 0) {
                 // already colored
                 /**
@@ -58,8 +61,12 @@ void AbstractGraph_2::createAbstractGraphNodes() {
                     // already colored
                     continue;
                 }
+                if (abNode.totalNodesInRepresentation + abNode1.totalNodesInRepresentation
+                    + abNode2.totalNodesInRepresentation > MAX_NODES) continue;
+
                 double edge2 = abGraph.findShortestDistanceBetweenNodes(abNode2, abNode);
                 if (edge2 > MAX_EDGE_LENGTH) continue;
+
                 if (abGraph.findShortestDistanceBetweenNodes(abNode2, abNode1) < max(edge1, edge2)) {
                     /**
                      * 3 clique must have diagonal edge longer than side edges
@@ -94,6 +101,8 @@ void AbstractGraph_2::createAbstractGraphNodes() {
                     if (!abNode1.reachableNodes.contains(abNode3.color) || !abNode.reachableNodes.contains(abNode3.color)) {
                         continue;
                     }
+                    if (abNode.totalNodesInRepresentation + abNode1.totalNodesInRepresentation
+                        + abNode2.totalNodesInRepresentation + abNode3.totalNodesInRepresentation > MAX_NODES) continue;
 
                     double edge3 = abGraph.findShortestDistanceBetweenNodes(abNode1, abNode3);
                     double edge4 = abGraph.findShortestDistanceBetweenNodes(abNode2, abNode3);
@@ -104,7 +113,6 @@ void AbstractGraph_2::createAbstractGraphNodes() {
                         */
                         continue;
                     }
-
                     /// abNode3 in intersection of abNode1 and abNode2
                     /**
                      * We have found the 4 nodes clique
