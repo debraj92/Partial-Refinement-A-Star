@@ -44,11 +44,17 @@ public:
 
     virtual double heuristic(ulonglong nodeColor) {
         const auto &node = unrank(nodeColor);
+        /*
         const auto& representationCurrent = node.representationCenter;
         double delta_x = abs(representationCurrent.first - goalX);
         double delta_y = abs(representationCurrent.second - goalY);
 
         return abs(delta_x - delta_y) + sqrt(2 * delta_x * delta_y);
+        */
+
+        return sqrt(pow(node.representationCenter.first - goalX, 2) +
+                    pow(node.representationCenter.second - goalY, 2));
+
     };
 
     virtual inline double findShortestDistanceBetweenNodes(const AbstractNode &node1, const AbstractNode &node2) {

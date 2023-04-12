@@ -449,7 +449,7 @@ bool AStarSearch::searchPathInAbstractGraphWithAstar(unique_ptr<unordered_map<ul
         }
     }
     if(!isPathFound) {
-        cout<<"Abstract Path Not Found"<<endl;
+        //cout<<"Abstract Path Not Found"<<endl;
     }
 
     auto t2 = high_resolution_clock::now();
@@ -584,7 +584,7 @@ void AStarSearch::printPathNodes(unique_ptr<unordered_map<ulonglong, ulonglong>>
  */
 bool
 AStarSearch::searchAndTruncatePathInAbstractWorld(int K, unique_ptr<unordered_set<ulonglong>> &abstractParentNodes, ulonglong &parentGoalColor) {
-    int abstractionLevel = 7;
+    int abstractionLevel = 6;
     unique_ptr<unordered_map<ulonglong, ulonglong>> path = make_unique<unordered_map<ulonglong, ulonglong>>();
     bool isPathFound = true;
     ulonglong startColor = 0;
