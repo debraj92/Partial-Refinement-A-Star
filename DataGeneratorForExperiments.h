@@ -37,7 +37,7 @@ class DataGeneratorForExperiments {
 
 public:
 
-    void test();
+    void run();
 };
 
 

@@ -12,7 +12,7 @@
 #include <time.h>
 
 void DataGeneratorForExperiments::populateFileNames() {
-    std::string path = "/Users/debrajray/MyComputer/658/project/baldurGate/";
+    std::string path = "/Users/debrajray/MyComputer/658/project/warcraft/wc3maps512-map";
     for (const auto & entry : filesystem::directory_iterator(path)) {
         if (entry.path().extension() == ".map") {
             fileNames.push_back(entry.path());
@@ -20,7 +20,7 @@ void DataGeneratorForExperiments::populateFileNames() {
     }
 }
 
-void DataGeneratorForExperiments::test() {
+void DataGeneratorForExperiments::run() {
     populateFileNames();
     populateDataPoints();
     writeToFile();
@@ -31,22 +31,34 @@ void DataGeneratorForExperiments::populateDataPoints() {
     bins.resize(13);
     int totalPaths = 0;
     unique_ptr<unordered_map<ulonglong, ulonglong>> pathRealWorld = make_unique<unordered_map<ulonglong, ulonglong>>();
+    int skipTill = 2;
+
+    //for(int j=skipTill; j <= fileNames.size()/2; ++j) {
+    //    std::swap(fileNames[j], fileNames[fileNames.size() - j]);
+    //}
+
+
+    int i = 1;
     for(const string& fileName : fileNames) {
+        if(fileName.empty()) continue;
+        if (i++<skipTill) continue;
         cout<<"Map "<<fileName<<endl;
+        int pathsCollected = 0;
         AStarSearch aStar;
         aStar.createAbstractGraph(fileName);
         vector<AbstractNode> abstractNodes;
+        int countSkip1 = 0;
         for(int abLevel = 5; abLevel >= 2; --abLevel) {
+        //for(int abLevel = 2; abLevel <= 5; ++abLevel) {
             aStar.copyAbstractNodesFromLevel(abLevel, abstractNodes);
             /**
             * Start and End nodes are picked from the centroid of the abstract nodes
             */
             bool skipping = false;
-            int countSkip1 = 0;
             for(int fromNodeIdx = 0; fromNodeIdx < abstractNodes.size() - 1; ++fromNodeIdx) {
                 int countSkip2 = 0;
                 if(skipping) {
-                    if(countSkip1 > 200) {
+                    if(countSkip1 > 100) {
                         break;
                     }
                     ++countSkip1;
@@ -67,7 +79,7 @@ void DataGeneratorForExperiments::populateDataPoints() {
                             if(!skipping) {
                                 cout<<"SKIP"<<endl;
                             }
-                            if(countSkip2 > 200) {
+                            if(countSkip2 > 20) {
                                 break;
                             }
                             skipping = true;
@@ -81,7 +93,7 @@ void DataGeneratorForExperiments::populateDataPoints() {
                             if(!skipping) {
                                 cout<<"SKIP"<<endl;
                             }
-                            if(countSkip2 > 200) {
+                            if(countSkip2 > 20) {
                                 break;
                             }
                             skipping = true;
@@ -89,9 +101,7 @@ void DataGeneratorForExperiments::populateDataPoints() {
                             continue;
                         }
                         skipping = false;
-                        // 11,000 data points in total
-                        // 5500 per game of 2 games: Baldur Gate and Warcraft
-                        if (totalPaths >= 4000) {
+                        if (totalPaths >= 6000) {
                             /**
                              * Termination
                              */
@@ -99,20 +109,24 @@ void DataGeneratorForExperiments::populateDataPoints() {
                             return;
                         }
                         if(totalPaths % 100 == 0) {
-                            cout<<"Completed "<<(totalPaths * 100 / 4000)<<"%, totalPaths: "<<totalPaths<<", Time: ";
+                            cout<<"Completed "<<(totalPaths * 100 / 6000)<<"%, totalPaths: "<<totalPaths<<", Time: ";
                             printTime();
                             cout<<endl;
                         }
                         int binIdx = floor(dataPoint.aStarPathLength / 50);
                         ++bins[binIdx];
                         ++totalPaths;
+                        ++pathsCollected;
+                        if(pathsCollected > 2000) {
+                            break;
+                        }
                         cout<<"From: ("<<abstractNodes[fromNodeIdx].centroidRealNode.first<<", "<<abstractNodes[fromNodeIdx].centroidRealNode.second<<")  ";
                         cout<<"To: ("<<abstractNodes[toNodeIdx].centroidRealNode.first<<", "<<abstractNodes[toNodeIdx].centroidRealNode.second<<")  ";
                         cout<<"A* Path Length "<<dataPoint.aStarPathLength<<" Time "<<dataPoint.aStarExecTime<<endl;
-                        //cout<<"A* path found, path length "<<dataPoint.aStarPathLength<<" Exec time "<<dataPoint.aStarExecTime<<endl;
                         if (!aStar.partialRefinementAStarSearch(10000, dataPoint)) {
                             throw std::runtime_error("PRA*(Inf) did not find a path, however PATH MUST EXIST");
                         }
+                        //cout<<"PRA inf , path ratio "<<dataPoint.praStar_Inf_PathLength_ratio<<endl;
                         if (!aStar.partialRefinementAStarSearch(2, dataPoint)) {
                             throw std::runtime_error("PRA*(2) did not find a path, however PATH MUST EXIST");
                         }
@@ -128,6 +142,12 @@ void DataGeneratorForExperiments::populateDataPoints() {
                         dataPoints.emplace_back(dataPoint);
                     }
                 }
+                if(pathsCollected > 1500) {
+                    break;
+                }
+            }
+            if(pathsCollected > 1500) {
+                break;
             }
         }
     }
@@ -136,10 +156,10 @@ void DataGeneratorForExperiments::populateDataPoints() {
 void DataGeneratorForExperiments::writeToFile() {
     cout<<"Writing data:"<<endl;
     ofstream myfile;
-    myfile.open ("/Users/debrajray/MyComputer/658/project/project_out.csv");
+    myfile.open ("/Users/debrajray/MyComputer/658/project/wc3maps512_out_2.csv");
     for(const auto &datapoint: dataPoints) {
         myfile<<datapoint.aStarPathLength<<","<<datapoint.aStarExecTime<<","<<datapoint.praStar_Inf_PathLength<<","<<datapoint.praStar_Inf_ExecTime<<","<<datapoint.praStar_Inf_PathLength_ratio<<",";
-        myfile<<datapoint.praStar_K16_PathLength<<","<<datapoint.praStar_K16_ExecTime<<","<<datapoint.praStar_K16_PathLength_ratio<<datapoint.praStar_K8_PathLength<<","<<datapoint.praStar_K8_ExecTime<<","<<datapoint.praStar_K8_PathLength_ratio<<",";
+        myfile<<datapoint.praStar_K16_PathLength<<","<<datapoint.praStar_K16_ExecTime<<","<<datapoint.praStar_K16_PathLength_ratio<<","<<datapoint.praStar_K8_PathLength<<","<<datapoint.praStar_K8_ExecTime<<","<<datapoint.praStar_K8_PathLength_ratio<<",";
         myfile<<datapoint.praStar_K4_PathLength<<","<<datapoint.praStar_K4_ExecTime<<","<<datapoint.praStar_K4_PathLength_ratio<<","<<datapoint.praStar_K2_PathLength<<","<<datapoint.praStar_K2_ExecTime<<","<<datapoint.praStar_K2_PathLength_ratio<<endl;
     }
     myfile.close();
@@ -156,5 +176,5 @@ void DataGeneratorForExperiments::printTime() {
 
 bool DataGeneratorForExperiments::checkSkip(int pathLength) {
     int binIdx = floor(pathLength / 50);
-    return (pathLength < 15 || pathLength >= 650) || (bins[binIdx] > 350);
+    return (pathLength < 30 || pathLength >= 700) || (bins[binIdx] > 500);
 }

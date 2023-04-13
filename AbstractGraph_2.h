@@ -64,6 +64,8 @@ public:
     ulonglong getStartColor();
 
     unordered_map<ulonglong, AbstractNode>& accessAbstractGraph();
+
+    void printConnectedColors();
 };
 
 

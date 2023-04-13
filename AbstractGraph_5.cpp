@@ -3,6 +3,7 @@
 //
 
 #include "AbstractGraph_5.h"
+#include <fstream>
 
 void AbstractGraph_5::createAbstractGraphNodes() {
     auto &abGraph4Map = abGraph4.accessAbstractGraph();
@@ -63,8 +64,8 @@ void AbstractGraph_5::createAbstractGraphNodes() {
 
                 double edge2 = abGraph4.findShortestDistanceBetweenNodes(abNode2, abNode);
                 if (edge2 > MAX_EDGE_LENGTH) continue;
-
-                if (abGraph4.findShortestDistanceBetweenNodes(abNode2, abNode1) < max(edge1, edge2)) {
+                double diagonal1 = abGraph4.findShortestDistanceBetweenNodes(abNode2, abNode1);
+                if (diagonal1 < max(edge1, edge2)) {
                     /**
                      * 3 clique must have diagonal edge longer than side edges
                      */
@@ -104,12 +105,14 @@ void AbstractGraph_5::createAbstractGraphNodes() {
                     double edge3 = abGraph4.findShortestDistanceBetweenNodes(abNode1, abNode3);
                     double edge4 = abGraph4.findShortestDistanceBetweenNodes(abNode2, abNode3);
                     if (edge3 > MAX_EDGE_LENGTH || edge4 > MAX_EDGE_LENGTH) continue;
-                    if (abGraph4.findShortestDistanceBetweenNodes(abNode, abNode3) < max(edge3, edge4)) {
+                    double diagonal2 = abGraph4.findShortestDistanceBetweenNodes(abNode, abNode3);
+                    if (diagonal2 < max(edge3, edge4)) {
                         /**
                         * 4 clique must have diagonal edge longer than side edges
                         */
                         continue;
                     }
+                    if (abs(diagonal1 - diagonal2) > MAX_DIFFERENCE) continue;
 
                     /// abNode3 in intersection of abNode1 and abNode2
                     /**
@@ -302,6 +305,8 @@ unordered_map<ulonglong, AbstractNode> &AbstractGraph_5::accessAbstractGraph() {
 }
 
 void AbstractGraph_5::printConnectedColors() {
+    ofstream myfile;
+    myfile.open ("/Users/debrajray/MyComputer/658/project/colors.csv");
     for(int i=0; i<rworld.MAX_SIZE; ++i) {
         for(int j=0; j<rworld.MAX_SIZE; ++j) {
             ulonglong abG5Color = 0;
@@ -313,18 +318,19 @@ void AbstractGraph_5::printConnectedColors() {
                 abG5Color = abGraph4.unrank(abG4Color).abstractionColor;
             }
             if(!abG5Color) {
-                cout<<".   ";
+                myfile<<".   ";
             } else {
-                cout<<abG5Color;
+                myfile<<abG5Color;
                 if (abG5Color < 10) {
-                    cout<<"   ";
+                    myfile<<"   ";
                 } else if (abG5Color < 100) {
-                    cout<<"  ";
+                    myfile<<"  ";
                 } else if (abG5Color >= 100) {
-                    cout<<" ";
+                    myfile<<" ";
                 }
             }
         }
-        cout<<endl;
+        myfile<<endl;
     }
+    myfile.close();
 }

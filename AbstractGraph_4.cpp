@@ -3,6 +3,7 @@
 //
 
 #include "AbstractGraph_4.h"
+#include <fstream>
 
 void AbstractGraph_4::createAbstractGraphNodes() {
     auto &abGraph3Map = abGraph3.accessAbstractGraph();
@@ -65,7 +66,8 @@ void AbstractGraph_4::createAbstractGraphNodes() {
 
                 double edge2 = abGraph3.findShortestDistanceBetweenNodes(abNode2, abNode);
                 if (edge2 > MAX_EDGE_LENGTH) continue;
-                if (abGraph3.findShortestDistanceBetweenNodes(abNode2, abNode1) < max(edge1, edge2)) {
+                double diagonal1 = abGraph3.findShortestDistanceBetweenNodes(abNode2, abNode1);
+                if (diagonal1 < max(edge1, edge2)) {
                     /**
                      * 3 clique must have diagonal edge longer than side edges
                      */
@@ -105,12 +107,14 @@ void AbstractGraph_4::createAbstractGraphNodes() {
                     double edge3 = abGraph3.findShortestDistanceBetweenNodes(abNode1, abNode3);
                     double edge4 = abGraph3.findShortestDistanceBetweenNodes(abNode2, abNode3);
                     if (edge3 > MAX_EDGE_LENGTH || edge4 > MAX_EDGE_LENGTH) continue;
-                    if (abGraph3.findShortestDistanceBetweenNodes(abNode, abNode3) < max(edge3, edge4)) {
+                    double diagonal2 = abGraph3.findShortestDistanceBetweenNodes(abNode, abNode3);
+                    if (diagonal2 < max(edge3, edge4)) {
                         /**
                         * 4 clique must have diagonal edge longer than side edges
                         */
                         continue;
                     }
+                    if (abs(diagonal1 - diagonal2) > MAX_DIFFERENCE) continue;
 
                     /// abNode3 in intersection of abNode1 and abNode2
                     /**
@@ -297,4 +301,34 @@ ulonglong AbstractGraph_4::getStartColor() {
 
 unordered_map<ulonglong, AbstractNode> &AbstractGraph_4::accessAbstractGraph() {
     return colorAbstractNodeMap;
+}
+
+void AbstractGraph_4::printConnectedColors() {
+    ofstream myfile;
+    myfile.open ("/Users/debrajray/MyComputer/658/project/colors.csv");
+    for(int i=0; i<rworld.MAX_SIZE; ++i) {
+        for(int j=0; j<rworld.MAX_SIZE; ++j) {
+            ulonglong abG4Color = 0;
+            if (rworld.getRealMap()[i][j] == 0) {
+                auto abGColor = rworld.getMapColors()[i][j];
+                auto abG2Color = abGraph.unrank(abGColor).abstractionColor;
+                auto abG3Color = abGraph2.unrank(abG2Color).abstractionColor;
+                abG4Color = abGraph3.unrank(abG3Color).abstractionColor;
+            }
+            if(!abG4Color) {
+                myfile<<".   ";
+            } else {
+                myfile << abG4Color;
+                if (abG4Color < 10) {
+                    myfile<<"   ";
+                } else if (abG4Color < 100) {
+                    myfile<<"  ";
+                } else if (abG4Color >= 100) {
+                    myfile<<" ";
+                }
+            }
+        }
+        myfile<<endl;
+    }
+    myfile.close();
 }

@@ -3,6 +3,7 @@
 //
 
 #include "AbstractGraph_2.h"
+#include <fstream>
 
 void AbstractGraph_2::createAbstractGraphNodes() {
     auto &abGraphMap = abGraph.accessAbstractGraph();
@@ -326,4 +327,32 @@ ulonglong AbstractGraph_2::getStartColor() {
 
 unordered_map<ulonglong, AbstractNode> &AbstractGraph_2::accessAbstractGraph() {
     return colorAbstractNodeMap;
+}
+
+void AbstractGraph_2::printConnectedColors() {
+    ofstream myfile;
+    myfile.open ("/Users/debrajray/MyComputer/658/project/colors.csv");
+    for(int i=0; i<rworld.MAX_SIZE; ++i) {
+        for(int j=0; j<rworld.MAX_SIZE; ++j) {
+            ulonglong abG2Color = 0;
+            if (rworld.getRealMap()[i][j] == 0) {
+                auto abGColor = rworld.getMapColors()[i][j];
+                abG2Color = abGraph.unrank(abGColor).abstractionColor;
+            }
+            if(!abG2Color) {
+                myfile<<".   ";
+            } else {
+                myfile<<abG2Color;
+                if (abG2Color < 10) {
+                    myfile<<"   ";
+                } else if (abG2Color < 100) {
+                    myfile<<"  ";
+                } else if (abG2Color >= 100) {
+                    myfile<<" ";
+                }
+            }
+        }
+        myfile<<endl;
+    }
+    myfile.close();
 }

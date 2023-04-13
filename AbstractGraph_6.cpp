@@ -64,6 +64,7 @@ void AbstractGraph_6::createAbstractGraphNodes() {
                     + abNode2.totalNodesInRepresentation > MAX_NODES) continue;
 
                 double edge2 = abGraph5.findShortestDistanceBetweenNodes(abNode2, abNode);
+                double diagonal1 = abGraph5.findShortestDistanceBetweenNodes(abNode2, abNode1);
                 if (edge2 > MAX_EDGE_LENGTH) continue;
                 if (abGraph5.findShortestDistanceBetweenNodes(abNode2, abNode1) < max(edge1, edge2)) {
                     /**
@@ -105,12 +106,14 @@ void AbstractGraph_6::createAbstractGraphNodes() {
                     double edge3 = abGraph5.findShortestDistanceBetweenNodes(abNode1, abNode3);
                     double edge4 = abGraph5.findShortestDistanceBetweenNodes(abNode2, abNode3);
                     if (edge3 > MAX_EDGE_LENGTH || edge4 > MAX_EDGE_LENGTH) continue;
-                    if (abGraph5.findShortestDistanceBetweenNodes(abNode, abNode3) < max(edge3, edge4)) {
+                    double diagonal2 = abGraph5.findShortestDistanceBetweenNodes(abNode, abNode3);
+                    if (diagonal2 < max(edge3, edge4)) {
                         /**
                         * 4 clique must have diagonal edge longer than side edges
                         */
                         continue;
                     }
+                    if (abs(diagonal1 - diagonal2) > MAX_DIFFERENCE) continue;
 
 
                     /// abNode3 in intersection of abNode1 and abNode2

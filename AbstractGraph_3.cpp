@@ -3,7 +3,7 @@
 //
 
 #include "AbstractGraph_3.h"
-
+#include <fstream>
 
 void AbstractGraph_3::createAbstractGraphNodes() {
     auto &abGraph2Map = abGraph2.accessAbstractGraph();
@@ -302,6 +302,8 @@ unordered_map<ulonglong, AbstractNode> &AbstractGraph_3::accessAbstractGraph() {
 }
 
 void AbstractGraph_3::printConnectedColors() {
+    ofstream myfile;
+    myfile.open ("/Users/debrajray/MyComputer/658/project/colors.csv");
     for(int i=0; i<rworld.MAX_SIZE; ++i) {
         for(int j=0; j<rworld.MAX_SIZE; ++j) {
             ulonglong abG3Color = 0;
@@ -311,18 +313,19 @@ void AbstractGraph_3::printConnectedColors() {
                 abG3Color = abGraph2.unrank(abG2Color).abstractionColor;
             }
             if(!abG3Color) {
-                cout<<".   ";
+                myfile<<".   ";
             } else {
-                cout<<abG3Color;
+                myfile<<abG3Color;
                 if (abG3Color < 10) {
-                    cout<<"   ";
+                    myfile<<"   ";
                 } else if (abG3Color < 100) {
-                    cout<<"  ";
+                    myfile<<"  ";
                 } else if (abG3Color >= 100) {
-                    cout<<" ";
+                    myfile<<" ";
                 }
             }
         }
-        cout<<endl;
+        myfile<<endl;
     }
+    myfile.close();
 }

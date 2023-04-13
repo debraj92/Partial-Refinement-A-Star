@@ -79,6 +79,8 @@ public:
 
     ulonglong getStartColor();
 
+    void printConnectedColors();
+
 };
 
 

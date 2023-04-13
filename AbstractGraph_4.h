@@ -19,8 +19,9 @@ using namespace std;
 
 class AbstractGraph_4 : public Abstraction {
 
-    const int MAX_EDGE_LENGTH = 6;
-    const int MAX_NODES = (MAX_EDGE_LENGTH * 12)^2;
+    const double MAX_EDGE_LENGTH = 9.3;
+    const double MAX_DIFFERENCE = 0.7;
+    const double MAX_NODES = pow((MAX_EDGE_LENGTH * 10),2);
 
     unordered_map<ulonglong, AbstractNode> colorAbstractNodeMap;
 
@@ -64,6 +65,8 @@ public:
     ulonglong getStartColor();
 
     unordered_map<ulonglong, AbstractNode>& accessAbstractGraph();
+
+    void printConnectedColors();
 };
 
 
